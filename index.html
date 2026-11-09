@@ -39,18 +39,18 @@ section.game{padding:22px 0 10px}
 .ghead h2{font-size:clamp(26px,3.6vw,36px);font-weight:900}
 .ghead .sub{font-size:18px;color:var(--mute)}
 /* stage */
-.stagebox{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#20302C;box-shadow:0 10px 30px rgba(18,52,59,.18)}
-.stagebox:fullscreen{border-radius:0;background:#20302C}
-#stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;background:radial-gradient(ellipse at 50% 45%,#2C4A42 0,#1C2E2A 75%);overflow:hidden;--t:600ms}
+.stagebox{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#2E2620;box-shadow:0 10px 30px rgba(18,52,59,.18)}
+.stagebox:fullscreen{border-radius:0;background:#2E2620}
+#stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;background:radial-gradient(ellipse at 50% 45%,#5B4A3C 0,#2E2620 78%);overflow:hidden;--t:600ms}
 #stage.fast{--t:0ms}
 #stage.fast *{transition-duration:0ms!important;animation-duration:0ms!important}
-.felt{position:absolute;left:170px;top:140px;width:940px;height:460px;border-radius:230px;background:radial-gradient(ellipse at 50% 40%,var(--felt) 0,var(--felt2) 80%);box-shadow:inset 0 0 0 10px #7A4E2D,inset 0 0 0 14px #5C3A20,0 14px 40px rgba(0,0,0,.35)}
-.bar{position:absolute;left:0;right:0;top:0;height:58px;background:rgba(10,20,18,.72);color:#fff;display:flex;align-items:center;gap:14px;padding:0 20px;font-size:24px;font-weight:700;z-index:50}
+.felt{position:absolute;left:170px;top:140px;width:940px;height:460px;border-radius:26px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 3px,transparent 3px 22px),repeating-linear-gradient(90deg,rgba(80,40,10,.10) 0 1px,transparent 1px 57px),linear-gradient(180deg,#C8925A 0,#B57B45 50%,#A86E3B 100%);box-shadow:inset 0 0 0 6px #8A5A2E,inset 0 2px 0 8px rgba(255,235,200,.25),0 16px 34px rgba(0,0,0,.45)}
+.bar{position:absolute;left:0;right:0;top:0;height:58px;background:rgba(10,20,18,.72);color:#fff;display:flex;align-items:center;gap:14px;padding:0 20px;font-size:24px;font-weight:700;z-index:5000}
 .bar .chip{font-size:17px;background:var(--amber);color:var(--ink);border-radius:999px;padding:2px 12px;flex:none}
 .bar .txt{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .bar .round{font-size:18px;color:#FFE2A8;flex:none}
 /* seats */
-.seat{position:absolute;width:170px;height:84px;margin:-42px 0 0 -85px;background:#FFFDF8;border-radius:16px;display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:box-shadow .3s,transform .3s;z-index:30}
+.seat{position:absolute;width:170px;height:84px;margin:-42px 0 0 -85px;background:#FFFDF8;border-radius:16px;display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:box-shadow .3s,transform .3s;z-index:3000}
 .seat .av{width:52px;height:52px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff}
 .seat .nm{font-size:19px;font-weight:900;line-height:1.15}
 .seat .sc{font-size:16px;color:var(--body);font-weight:700}
@@ -75,16 +75,16 @@ section.game{padding:22px 0 10px}
 .card.gone{opacity:0}
 .xmark{position:absolute;inset:-6px;display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--orange);font-weight:900;text-shadow:0 2px 4px rgba(0,0,0,.4)}
 /* effects */
-.float{position:absolute;font-size:40px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #B5480F,0 0 12px rgba(0,0,0,.4);z-index:60;pointer-events:none;animation:floatup 1.3s ease-out forwards;transform:translate(-50%,-50%)}
+.float{position:absolute;font-size:40px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #B5480F,0 0 12px rgba(0,0,0,.4);z-index:6000;pointer-events:none;animation:floatup 1.3s ease-out forwards;transform:translate(-50%,-50%)}
 @keyframes floatup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
-.handfx{position:absolute;font-size:60px;z-index:55;transition:transform calc(var(--t)*.7) ease-in;pointer-events:none;margin:-30px 0 0 -30px}
-.bubble{position:absolute;background:#fff;color:var(--ink);font-size:26px;font-weight:900;border-radius:20px;padding:8px 18px;z-index:58;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:pop .35s ease-out;white-space:nowrap;transform:translate(-50%,-50%)}
+.handfx{position:absolute;font-size:60px;z-index:5500;transition:transform calc(var(--t)*.7) ease-in;pointer-events:none;margin:-30px 0 0 -30px}
+.bubble{position:absolute;background:#fff;color:var(--ink);font-size:26px;font-weight:900;border-radius:20px;padding:8px 18px;z-index:5800;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:pop .35s ease-out;white-space:nowrap;transform:translate(-50%,-50%)}
 .bubble.o{background:var(--orange);color:#fff}
 @keyframes pop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}70%{transform:translate(-50%,-50%) scale(1.15);opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
-.label{position:absolute;transform:translate(-50%,-50%);font-size:20px;font-weight:700;color:#FFF3D6;z-index:25;white-space:nowrap;text-shadow:0 2px 4px rgba(0,0,0,.5)}
-.count{position:absolute;transform:translate(-50%,-50%);min-width:38px;height:38px;border-radius:19px;background:var(--orange);color:#fff;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:40;padding:0 8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.label{position:absolute;transform:translate(-50%,-50%);font-size:20px;font-weight:700;color:#FFF3D6;z-index:2500;white-space:nowrap;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+.count{position:absolute;transform:translate(-50%,-50%);min-width:38px;height:38px;border-radius:19px;background:var(--orange);color:#fff;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:4000;padding:0 8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 /* big 字卡 */
-.cue{position:absolute;left:50%;top:50%;width:780px;transform:translate(-50%,-50%);background:#FFFDF8;border-radius:26px;padding:30px 40px 34px;z-index:80;box-shadow:0 20px 60px rgba(0,0,0,.45);border:5px solid var(--amber);animation:cuein .45s cubic-bezier(.2,.9,.3,1.2)}
+.cue{position:absolute;left:50%;top:50%;width:780px;transform:translate(-50%,-50%);background:#FFFDF8;border-radius:26px;padding:30px 40px 34px;z-index:8000;box-shadow:0 20px 60px rgba(0,0,0,.45);border:5px solid var(--amber);animation:cuein .45s cubic-bezier(.2,.9,.3,1.2)}
 .cue .k{display:inline-block;font-size:20px;font-weight:900;color:#fff;background:var(--orange);border-radius:999px;padding:3px 16px}
 .cue h3{font-size:46px;font-weight:900;line-height:1.2;margin:10px 0 8px;color:var(--ink)}
 .cue p{font-size:28px;line-height:1.5;color:var(--body)}
@@ -92,7 +92,7 @@ section.game{padding:22px 0 10px}
 @keyframes cuein{from{opacity:0;transform:translate(-50%,-40%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%)}}
 @keyframes cueout{to{opacity:0;transform:translate(-50%,-110%) scale(.6)}}
 /* 撲克拉霸抽籤器 (drawn like mattsue1003.github.io/pokerrandom) */
-.pr{position:absolute;left:18px;top:62px;width:390px;padding:6px 50px 8px 12px;border-radius:18px;z-index:45;background:radial-gradient(circle at 20% 10%,#1a2a6c,#b21f1f 60%,#fdbb2d);box-shadow:0 8px 24px rgba(0,0,0,.45);color:#fff}
+.pr{position:absolute;left:18px;top:62px;width:390px;padding:6px 50px 8px 12px;border-radius:18px;z-index:4500;background:radial-gradient(circle at 20% 10%,#1a2a6c,#b21f1f 60%,#fdbb2d);box-shadow:0 8px 24px rgba(0,0,0,.45);color:#fff}
 .pr h4{font-size:19px;font-weight:900;color:#FFD700;text-align:center;text-shadow:0 2px 3px rgba(0,0,0,.5)}
 .pr .opts{display:flex;gap:8px;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin:2px 0 4px}
 .pr .sel{background:#1f2937;border:2px solid #4b5563;border-radius:8px;padding:1px 10px;font-size:17px}
@@ -189,7 +189,7 @@ footer .fb{display:inline-block;margin-top:8px;font-weight:700;color:#fff;backgr
 </main>
 
 <footer><div class="wrap">
-  <p>同一副牌還能玩更多：形色棋、拉密、數字撞鐘、誰是牛頭王，見 <a href="https://mattsue1003.github.io/card-games-108/" target="_blank" rel="noopener">一副牌玩到底（108 張手繪卡）</a>。</p>
+  <p>撲克牌破冰 7 種玩法：拍牌、喊名字、逆轉勝、去頭去尾、抽籤搶牌、排七、撿紅點。</p>
   <p>想看更多教案？歡迎加入粉絲專頁，留言就能拿到教案連結。</p>
   <a class="fb" href="https://www.facebook.com/profile.php?id=100063748491881" target="_blank" rel="noopener">臉書粉絲專頁：鍾孟修Matt-職能治療師 →</a>
 </div></footer>
@@ -269,8 +269,11 @@ function card(r, s, o = {}){
   c.r = r; c.s = s; c.o = {x: CENTER.x, y: CENTER.y, rot: 0, sc: 1, up: false, z: 10, ...o};
   place(c, {}); return c;
 }
+let ZT = 100;   // last card flipped or moved always sits on top of the others
 function place(c, o){
+  const moving = 'x' in o || 'y' in o || 'up' in o;
   Object.assign(c.o, o);
+  if (moving) c.o.z = ++ZT;
   const {x, y, rot, sc, up, z} = c.o;
   c.style.transform = `translate(${x - 35}px,${y - 49}px) rotate(${rot}deg) scale(${sc})`;
   c.style.zIndex = z; c.classList.toggle('up', !!up);
@@ -330,7 +333,7 @@ function chap(i){
 
 /* ---- runner ---- */
 async function run(startChap = 0){
-  ST.run++; const id = ST.run;
+  ST.run++; const id = ST.run; ZT = 100;
   stage.innerHTML = ''; stage.className = '';
   el('felt'); bar();
   ST.fast = startChap > 0; ST.startChap = startChap; if (ST.fast) stage.classList.add('fast');
