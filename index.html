@@ -694,31 +694,75 @@ GAMES.push({
       who.forEach((p, i) => { place(tc[i], {x: WON[p].x + scores[p] * 4, y: WON[p].y, rot: 0, sc: .7, z: 30 + scores[p]}); addScore(p, 1); });
       sfx('coin'); await sleep(900);
     };
+    const fast = async fn => {   // 快轉：同樣的回合，播快一點
+      const keep = ST.speed; ST.speed = keep * 3.5; stage.style.setProperty('--t', Math.round(600 / ST.speed) + 'ms');
+      try { await fn(); } finally { ST.speed = keep; stage.style.setProperty('--t', Math.round(600 / keep) + 'ms'); }
+    };
+    const playRound = async (cards, who, ff) => {
+      await spin(cards); if (ff) rnd(`快轉 ▶▶ 第 ${round} 回合 / 10`);
+      await grab(cards, who);
+    };
     chap(2);
     await cue('第 3 步　拉桿抽牌', '拉桿或按 SPIN', '帶領者拉右邊的<b>拉桿</b>或按 <b>SPIN! 啟動抽籤</b>，畫面停在哪一張，大家就去找那一張。');
     await spin([[7, '♥']]);
     chap(3);
     await grab([[7, '♥']], [2]);
     await cue('第 4 步　搶牌得分', '先搶到的得 1 分', '阿珠先摸到<b>紅心 7</b>，得 1 分。<b>每人每回合限拿一張。</b>');
-    await spin([[12, '♠']]); await grab([[12, '♠']], [0]);
+    await playRound([[12, '♠']], [0]);
+    note('第 3 回合一樣抽 1 張（快轉）');
+    await fast(() => playRound([[3, '♦']], [1], true));
     chap(4);
     sel.textContent = '2 張 ▾'; sel.classList.add('hl'); sfx('pop');
     await cue('第 5 步　逐步加難度', '第 4 回合起抽 2 張', '第 1–3 回合抽 1 張；第 4 回合把「一次抽幾張」改成 <b>2 張</b>，第 7 回合改成 <b>3 張</b>。');
     sel.classList.remove('hl');
-    round = 3; await spin([[3, '♦'], [9, '♣']]); await grab([[3, '♦'], [9, '♣']], [1, 3]);
-    sel.textContent = '3 張 ▾'; sel.classList.add('hl'); sfx('pop'); note('第 7 回合：改成一次抽 3 張'); await sleep(900); sel.classList.remove('hl');
-    round = 6; await spin([[13, '♥'], [1, '♣'], [6, '♠']]); await grab([[13, '♥'], [1, '♣'], [6, '♠']], [3, 2, 0]);
+    await playRound([[9, '♣'], [13, '♥']], [3, 2]);
+    note('第 5、6 回合一樣抽 2 張（快轉）');
+    await fast(async () => { await playRound([[1, '♣'], [6, '♠']], [0, 1], true); await playRound([[11, '♦'], [4, '♣']], [2, 3], true); });
+    sel.textContent = '3 張 ▾'; sel.classList.add('hl'); sfx('pop'); note('第 7 回合：改成一次抽 3 張'); await sleep(1200); sel.classList.remove('hl');
+    await playRound([[8, '♥'], [1, '♠'], [12, '♦']], [1, 3, 0]);
+    note('第 8、9、10 回合一樣抽 3 張（快轉）');
+    await fast(async () => {
+      await playRound([[3, '♣'], [6, '♥'], [13, '♠']], [2, 0, 1], true);
+      await playRound([[2, '♦'], [9, '♠'], [4, '♥']], [3, 2, 0], true);
+      await playRound([[11, '♠'], [5, '♦'], [7, '♣']], [1, 3, 2], true);
+    });
     chap(5);
-    rd.textContent = '回合 10 / 10'; rnd('第 10 回合 / 10');
-    const tu = el('timeup', '<b>TIME UP!</b><span>10 回合已結束！請結算手中的牌數分。</span>', tool); sfx('buzz');
+    rnd('第 10 回合 / 10');
+    el('timeup', '<b>TIME UP!</b><span>10 回合已結束！請結算手中的牌數分。</span>', tool); sfx('buzz');
     await cue('第 6 步　結束', '10 回合 TIME UP', '抽籤器跳出 <b>TIME UP</b>，數一數自己手中的牌，最多的人贏。');
-    note('（快轉到最後）數手中的牌');
-    [5, 4, 6, 7].forEach((v, p) => setScore(p, v)); crown(3); sfx('win'); note('阿德手上 7 張最多，獲勝！');
+    const best = Math.max(...scores); crown(scores.indexOf(best)); sfx('win');
+    note(`${this.players[scores.indexOf(best)]}手上 ${best} 張最多，獲勝！`);
     await cue('制勝關鍵', '先看花色再看數字', this.key, 3200);
   }
 });
 
-/* 6. 排七 */
+/* 6. 排七：照規則真的玩完一整局（固定洗牌，每次結果一樣） */
+function sevensSim(seed){
+  const SU = ['♠', '♥', '♦', '♣'];
+  let x = seed; const rand = () => (x = (x * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const deck = []; for (const s of SU) for (let r = 1; r <= 13; r++) deck.push({r, s});
+  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  const hands = [[], [], [], []]; deck.forEach((c, i) => hands[i % 4].push(c));
+  const start = hands.map(h => h.slice());
+  const lo = {}, hi = {}; let first = true;
+  const legal = c => first ? (c.r === 7 && c.s === '♠') : lo[c.s] == null ? c.r === 7 : (c.r === lo[c.s] - 1 || c.r === hi[c.s] + 1);
+  let p = hands.findIndex(h => h.some(c => c.r === 7 && c.s === '♠'));
+  const moves = [];
+  while (hands.some(h => h.length)) {
+    const h = hands[p];
+    if (h.length) {
+      const L = h.filter(legal).sort((a, b) => Math.abs(a.r - 7) - Math.abs(b.r - 7) || SU.indexOf(a.s) - SU.indexOf(b.s));
+      let c, type;
+      if (L.length) { c = L[0]; type = 'play'; if (c.r === 7) lo[c.s] = hi[c.s] = 7; else if (c.r < 7) lo[c.s] = c.r; else hi[c.s] = c.r; first = false; }
+      else { c = h.slice().sort((a, b) => a.r - b.r)[0]; type = 'cover'; }
+      h.splice(h.indexOf(c), 1); moves.push({p, c, type});
+    }
+    p = (p + 1) % 4;
+  }
+  const pen = [0, 0, 0, 0]; moves.forEach(m => { if (m.type === 'cover') pen[m.p] += m.c.r; });
+  return {start, moves, pen};
+}
+const SEVENS_SEED = 520; // 阿美拿黑桃 7、第 7 步第一次蓋牌、1/5/2/4 分
 GAMES.push({
   id: 'sevens', name: '排七', sub: '從 7 開始，往上往下接龍',
   players: ['阿美', '阿雄', '阿珠', '阿德'],
@@ -727,7 +771,7 @@ GAMES.push({
     {t: '誰先出', d: '拿到黑桃 7 的人先出', mini: ['7♠*']},
     {t: '怎麼出牌', d: '從 7 往上接 8、9…，往下接 6、5…', mini: ['6♠', '7♠', '8♠']},
     {t: '沒牌可接', d: '蓋一張牌在自己面前', mini: ['b*']},
-    {t: '結束算分', d: '蓋牌加總，分數最少的贏', mini: ['K♣', 'Q♦']},
+    {t: '快轉玩完、算分', d: '蓋牌加總，分數最少的贏', mini: ['K♣', 'Q♦']},
   ],
   rules: [
     ['怎麼發牌', ['4 人，整副 52 張發完，每人 13 張。']],
@@ -739,140 +783,200 @@ GAMES.push({
   async script(){
     buildSeats(this.players, '張');
     chap(0);
-    const SU = ['♠', '♥', '♦', '♣'];
-    const all = []; for (const s of SU) for (let r = 1; r <= 13; r++) all.push(D(r, s));
-    // hands chosen so the demo plays out: 阿美 has 7♠
-    const want = {0: [[7,'♠'],[8,'♥'],[6,'♦'],[9,'♥']], 1: [[8,'♠'],[7,'♦'],[5,'♠'],[10,'♠']], 2: [[7,'♥'],[9,'♠'],[6,'♥'],[7,'♣']], 3: [[6,'♠'],[13,'♣'],[12,'♦'],[1,'♥']]};
-    const used = new Set(Object.values(want).flat().map(([r, s]) => r + s));
-    const rest = all.filter(d => !used.has(d.r + d.s));
-    const H = [[], [], [], []];
-    for (let p = 0; p < 4; p++) { const list = want[p].map(([r, s]) => D(r, s)); while (list.length < 13) list.push(rest.shift()); H[p] = list.map(d => card(d.r, d.s)); }
+    const {start, moves, pen} = sevensSim(SEVENS_SEED);
+    const H = start.map(h => h.map(d => card(d.r, d.s)));
     sfx('shuffle'); await sleep(400);
     const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 0));
     for (let i = 0; i < 13; i++) for (let p = 0; p < 4; p++) { sfx('deal'); place(H[p][i], stackPos(p, i)); counts[p].set(i + 1); setScore(p, i + 1); await sleep(32); }
     await cue('第 1 步　發牌', '每人 13 張', '整副 52 張洗好，一人一張輪流發，發完每人 <b>13 張</b>。');
-    // rows on the table
-    const rowY = {'♠': 235, '♥': 315, '♦': 395, '♣': 475};
+    const rowY = {'♠': 230, '♥': 310, '♦': 390, '♣': 470};
     const slotX = r => 640 + (r - 7) * 56;
-    Object.entries(rowY).forEach(([s, y]) => label(s, 258, y));
-    chap(1);
-    const takeC = (p, r, s) => { const i = H[p].findIndex(c => c.r === r && c.s === s); const c = H[p].splice(i, 1)[0]; counts[p].set(H[p].length); setScore(p, H[p].length); return c; };
-    const playC = async (p, r, s, msg) => {
-      turn(p); note(msg); await sleep(450);
-      const c = takeC(p, r, s); sfx('deal');
-      place(c, {x: slotX(r), y: rowY[s], rot: 0, sc: .78, z: 20 + r, up: true}); await sleep(380); sfx('flip'); await sleep(500);
-      return c;
+    Object.entries(rowY).forEach(([s, y]) => label(s, 262, y));
+    const covers = [[], [], [], []];
+    const take = (p, d) => { const i = H[p].findIndex(c => c.r === d.r && c.s === d.s); const c = H[p].splice(i, 1)[0]; counts[p].set(H[p].length); setScore(p, H[p].length); return c; };
+    const nm = c => ({'♠': '黑桃', '♥': '紅心', '♦': '方塊', '♣': '梅花'})[c.s] + ' ' + RN[c.r];
+    const doMove = async (m, wait) => {
+      const c = take(m.p, m.c); turn(m.p);
+      if (m.type === 'play') {
+        note(`${this.players[m.p]}出${nm(m.c)}`); sfx('deal');
+        place(c, {x: slotX(m.c.r), y: rowY[m.c.s], rot: 0, sc: .78, up: true}); await sleep(wait * .45); sfx('flip');
+      } else {
+        note(`${this.players[m.p]}：沒有牌能接 → 蓋一張`); sfx('buzz');
+        const k = covers[m.p].length; covers[m.p].push(c);
+        place(c, {x: WON[m.p].x + k * 7, y: WON[m.p].y + k * 3, rot: (k % 3) * 5 - 5, sc: .72, up: false});
+      }
+      await sleep(wait * .55);
     };
-    turn(0);
-    await cue('第 2 步　誰先出', '黑桃 7 先出', '大家看看手上：拿到 <b>黑桃 7</b> 的阿美先出，再順時針輪流。');
-    const s7 = await playC(0, 7, '♠', '阿美出黑桃 7'); glow(s7); await sleep(500); glow(s7, false);
+    chap(1); turn(moves[0].p);
+    await cue('第 2 步　誰先出', '黑桃 7 先出', `大家看看手上：拿到 <b>黑桃 7</b> 的${this.players[moves[0].p]}先出，再順時針輪流。`);
+    await doMove(moves[0], 1300);
     chap(2);
-    await cue('第 3 步　怎麼出牌', '從 7 往兩邊接', '同一花色：往上接 <b>8、9…K</b>，往下接 <b>6、5…A</b>。其他花色的 7 隨時可以出。');
-    await playC(1, 8, '♠', '阿雄接黑桃 8');
-    await playC(2, 7, '♥', '阿珠出紅心 7，開一排新的');
-    await playC(3, 6, '♠', '阿德接黑桃 6');
-    await playC(0, 8, '♥', '阿美接紅心 8');
-    await playC(1, 7, '♦', '阿雄出方塊 7');
-    await playC(2, 9, '♠', '阿珠接黑桃 9');
+    await cue('第 3 步　怎麼出牌', '從 7 往兩邊接', '同一花色：往上接 <b>8、9…K</b>，往下接 <b>6、5…A</b>。其他花色的 7 隨時可以出。有牌能接就一定要出。');
+    let i = 1, firstCover = moves.findIndex(m => m.type === 'cover');
+    for (; i < firstCover; i++) await doMove(moves[i], 1300);
     chap(3);
-    turn(3); note('阿德：手上沒有能接的牌……'); await sleep(900); sfx('buzz');
-    const cov = takeC(3, 13, '♣'); place(cov, {x: WON[3].x, y: WON[3].y, rot: 8, sc: .8, z: 30, up: false}); sfx('deal'); await sleep(700);
-    await cue('第 4 步　沒牌可接', '蓋一張在自己面前', '有牌能接一定要出；<b>都不能接</b>，就選一張牌<b>蓋著</b>放在自己面前，最後要算分。');
-    await playC(0, 6, '♦', '阿美接方塊 6');
-    await playC(1, 5, '♠', '阿雄接黑桃 5');
-    await playC(2, 6, '♥', '阿珠接紅心 6');
-    turn(3); note('阿德又不能接 → 再蓋一張'); await sleep(700); sfx('buzz');
-    const cov2 = takeC(3, 12, '♦'); place(cov2, {x: WON[3].x + 10, y: WON[3].y + 6, rot: -6, sc: .8, z: 31, up: false}); sfx('deal'); await sleep(900);
+    await doMove(moves[i++], 1500);
+    await cue('第 4 步　沒牌可接', '蓋一張在自己面前', '有牌能接一定要出；<b>都不能接</b>，就選一張牌<b>蓋著</b>放在自己面前，最後要算分。蓋點數小的比較划算。');
+    for (const stop = i + 4; i < stop && i < moves.length; i++) await doMove(moves[i], 1300);
     chap(4);
-    await cue('第 5 步　結束算分', '蓋牌加總，越少越好', '大家輪流接到手牌出完。翻開自己<b>蓋起來的牌</b>加總，<b>分數最少的人贏</b>。');
-    note('（快轉到最後）翻開蓋牌加總'); rnd('');
-    counts.forEach(c => c.set(0));
-    await flip(cov); await flip(cov2);
-    const pts = [0, 4, 1, 25];
-    buildScoresAs(pts, ['0', '4', '1', '13＋12＝25']);
-    crown(0); sfx('win'); note('阿美沒有蓋牌，0 分最少，獲勝！');
+    await cue('第 5 步　快轉玩完', '照同樣規則，一路玩到最後', '後面一樣輪流接、不能接就蓋牌，我們<b>快轉</b>看完整局。');
+    rnd('快轉 ▶▶'); const keep = ST.speed; ST.speed = keep * 4; stage.style.setProperty('--t', Math.round(600 / ST.speed) + 'ms');
+    try { for (; i < moves.length; i++) await doMove(moves[i], 1300); }
+    finally { ST.speed = keep; stage.style.setProperty('--t', Math.round(600 / keep) + 'ms'); }
+    turn(-1); rnd('');
+    stage.querySelectorAll('.count').forEach(e => e.remove());
+    await cue('第 6 步　算分', '翻開蓋牌加總，越少越好', '大家手牌出完，遊戲結束。翻開自己<b>蓋起來的牌</b>加總：A＝1、J＝11、Q＝12、K＝13。<b>分數最少的人贏。</b>');
+    for (let p = 0; p < 4; p++) {
+      for (const c of covers[p]) { sfx('flip'); place(c, {up: true}); await sleep(260); }
+      const parts = covers[p].map(c => c.r);
+      seats[p].querySelector('.sc').innerHTML = `<b>${pen[p]}</b> 分`;
+      floatTxt(parts.length ? (parts.length > 1 ? parts.join('＋') + '＝' : '') + pen[p] + ' 分' : '沒蓋牌 0 分', SEAT[p].x, SEAT[p].y - 60); sfx('coin');
+      await sleep(900);
+    }
+    const best = Math.min(...pen); pen.forEach((v, p) => { if (v === best) crown(p); }); sfx('win');
+    note(`${pen.map((v, p) => v === best ? this.players[p] : null).filter(Boolean).join('、')} ${best} 分最少，獲勝！`);
     await cue('制勝關鍵', '頭尾牌卡人、蓋小牌', this.key, 3200);
   }
 });
+
 function buildScoresAs(vals, txt){ vals.forEach((v, p) => { seats[p].querySelector('.sc').innerHTML = `<b>${v}</b> 分`; floatTxt(txt[p] + ' 分', SEAT[p].x, SEAT[p].y - 60); }); sfx('coin'); }
 
-/* 7. 撿紅點 */
+/* 7. 撿紅點：照規則真的玩完一整局（固定洗牌） */
+function redVal(c){ if (c.s === '♥' || c.s === '♦') return c.r === 1 ? 20 : c.r <= 8 ? c.r : 10; return c.s === '♠' && c.r === 1 ? 30 : 0; }
+function redMatch(a, b){ return a.r >= 10 ? a.r === b.r : a.r + b.r === 10; }
+function redSim(seed){
+  const SU = ['♠', '♥', '♦', '♣'];
+  let x = seed; const rand = () => (x = (x * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const deck = []; for (const s of SU) for (let r = 1; r <= 13; r++) deck.push({r, s});
+  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  const hands = [[], [], [], []]; for (let i = 0; i < 24; i++) hands[i % 4].push(deck[i]);
+  const table = deck.slice(24, 28), pile = deck.slice(28);
+  const start = {hands: hands.map(h => h.slice()), table: table.slice(), pile: pile.slice()};
+  const best = c => table.filter(t => redMatch(c, t)).sort((a, b) => redVal(b) - redVal(a))[0];
+  const moves = []; let maxTable = table.length;
+  for (let turn = 0; turn < 24; turn++) {
+    const p = turn % 4, h = hands[p];
+    // hand: the card that captures the most points; otherwise the card worth least
+    let pickC = null, pickT = null, gain = -1;
+    for (const c of h) { const t = best(c); if (t && redVal(c) + redVal(t) > gain) { gain = redVal(c) + redVal(t); pickC = c; pickT = t; } }
+    if (!pickC) pickC = h.slice().sort((a, b) => redVal(a) - redVal(b) || a.r - b.r)[0];
+    h.splice(h.indexOf(pickC), 1);
+    if (pickT) table.splice(table.indexOf(pickT), 1); else table.push(pickC);
+    moves.push({p, kind: 'hand', c: pickC, t: pickT || null});
+    maxTable = Math.max(maxTable, table.length);
+    const d = pile.shift(); const t2 = best(d);
+    if (t2) table.splice(table.indexOf(t2), 1); else table.push(d);
+    moves.push({p, kind: 'deck', c: d, t: t2 || null});
+    maxTable = Math.max(maxTable, table.length);
+  }
+  const won = [[], [], [], []]; moves.forEach(m => { if (m.t) won[m.p].push(m.c, m.t); });
+  return {start, moves, won, pts: won.map(w => w.reduce((a, c) => a + redVal(c), 0)), maxTable};
+}
+const RED_SEED = 25; // 第一手、第一翻都能收；阿美收 14 張（含紅心 A 和黑色 0 分牌）81 分最高
 GAMES.push({
   id: 'red', name: '撿紅點', sub: '湊成 10 就收走，比紅色牌的分數',
   players: ['阿美', '阿雄', '阿珠', '阿德'],
   chapters: [
-    {t: '發牌', d: '每人 6 張，桌上翻開 4 張', mini: ['b', '3♠', '8♥', 'K♣']},
+    {t: '發牌', d: '每人 6 張，牌堆四角翻開 4 張', mini: ['3♠', 'b', '8♥']},
     {t: '出牌配 10', d: '手牌和桌上的牌加起來 10 就收走', mini: ['2♦*', '8♥*']},
     {t: '翻牌堆', d: '再翻一張，能配也收走', mini: ['b', '4♣']},
     {t: '10、J、Q、K', d: '要配一樣的：K 配 K', mini: ['K♥*', 'K♣*']},
-    {t: '算紅點', d: '紅色牌算分，A 20、9–K 10', mini: ['A♥', '8♥', 'K♦']},
+    {t: '快轉玩完', d: '照同樣規則玩到牌都出完', mini: ['b', 'b', 'b']},
+    {t: '算紅點', d: '用阿美示範：紅色牌才算分', mini: ['A♥', '8♥', 'K♦']},
   ],
   rules: [
-    ['怎麼發牌', ['4 人，每人 <b>6 張</b>。', '桌子中間翻開 <b>4 張</b>，其餘蓋成牌堆。']],
+    ['怎麼發牌', ['4 人，每人 <b>6 張</b>。', '其餘當牌堆放中間，在牌堆的<b>四個角</b>各翻開 1 張。']],
     ['怎麼出牌、收牌', ['輪到你：出一張手牌，和桌上一張<b>加起來 10</b> 就兩張收走（A+9、2+8、3+7、4+6、5+5）。', '<b>10、J、Q、K</b> 要配一樣的：10 配 10、K 配 K。', '配不到：這張留在桌上。', '接著翻牌堆最上面一張，能配就收走，不能配就留在桌上。']],
     ['怎麼得分', ['紅心、方塊 A：20 分', '紅心、方塊 2–8：看數字', '紅心、方塊 9–K：10 分', '黑桃 A：30 分（各地不同，先約定）；其他黑色牌 0 分']],
-    ['什麼時候結束', ['牌都出完就結束，紅點分數最高的人贏。', '全副 240 分，4 人平均 60 分。']],
+    ['什麼時候結束', ['手牌和牌堆都出完就結束，紅點分數最高的人贏。', '全副 240 分，4 人平均 60 分。']],
   ],
   key: '先收紅色、分數高的牌（紅 A、紅 9–K）；黑色牌能收就收，免得留在桌上讓別人湊。',
   async script(){
     buildSeats(this.players);
     chap(0);
-    const H = [[[2,'♦'],[11,'♥'],[3,'♣'],[8,'♣'],[1,'♥'],[10,'♠']], [[11,'♠'],[4,'♥'],[9,'♣'],[6,'♣'],[12,'♥'],[2,'♠']], [[7,'♦'],[1,'♠'],[10,'♥'],[5,'♠'],[8,'♦'],[12,'♣']], [[5,'♣'],[3,'♥'],[13,'♠'],[9,'♦'],[4,'♠'],[6,'♠']]];
-    const handC = H.map(h => h.map(([r, s]) => card(r, s)));
-    const tableD = [[3,'♠'],[8,'♥'],[13,'♣'],[6,'♦']];
-    const deckD = [[4,'♣'],[13,'♥'],[5,'♥'],[9,'♥']];
+    const {start, moves, won, pts} = redSim(RED_SEED);
+    const D0 = {x: 640, y: 370};
+    // the 4 corners of the draw pile first, then more room around it
+    const SLOTS = [[530, 290], [750, 290], [530, 450], [750, 450], [420, 290], [860, 290], [420, 450], [860, 450], [310, 370], [970, 370], [640, 215], [640, 525]];
+    const slotOf = new Array(SLOTS.length).fill(null);
+    const putOnTable = c => { const k = slotOf.indexOf(null); slotOf[k] = c; c.slot = k; place(c, {x: SLOTS[k][0], y: SLOTS[k][1], rot: 0, sc: .9, up: true}); };
+    const liftFromTable = c => { slotOf[c.slot] = null; };
+    const H = start.hands.map(h => h.map(d => card(d.r, d.s)));
+    const pileC = start.pile.map((d, i) => card(d.r, d.s, {x: D0.x + i * .4, y: D0.y - i * .6, z: 40 - i, sc: .9}));
+    const tableC = start.table.map(d => card(d.r, d.s, {x: D0.x, y: D0.y, sc: .9}));
     sfx('shuffle'); await sleep(400);
     const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 0));
-    for (let i = 0; i < 6; i++) for (let p = 0; p < 4; p++) { sfx('deal'); place(handC[p][i], stackPos(p, i)); counts[p].set(i + 1); await sleep(60); }
-    const slotsX = [430, 520, 610, 700, 790, 880];
-    const table = tableD.map(([r, s], i) => card(r, s));
-    for (let i = 0; i < 4; i++) { sfx('deal'); place(table[i], {x: slotsX[i], y: 330, z: 15}); await sleep(160); await flip(table[i]); }
-    const deck = deckD.map(([r, s], i) => card(r, s, {x: 640, y: 470, z: 12 - i}));
-    for (let i = 0; i < 6; i++) card(0, '', {x: 640 + i * .5, y: 470 - i * .8, z: 5 + i});
-    label('牌堆', 640, 540);
-    await cue('第 1 步　發牌', '每人 6 張，桌上 4 張', '每人發 <b>6 張</b>，桌子中間翻開 <b>4 張</b>，其餘蓋著當牌堆。');
-    let free = 4; // next free slot index for cards left on the table
-    const tbl = table.slice();
-    const collect = async (p, a, b) => {
+    for (let i = 0; i < 6; i++) for (let p = 0; p < 4; p++) { sfx('deal'); place(H[p][i], stackPos(p, i)); counts[p].set(i + 1); await sleep(60); }
+    const pileCount = count(D0.x + 52, D0.y - 60, pileC.length);
+    label('牌堆', D0.x, D0.y + 66);
+    for (const c of tableC) { sfx('flip'); putOnTable(c); await sleep(300); }
+    await cue('第 1 步　發牌', '每人 6 張，四角翻開 4 張', '每人發 <b>6 張</b>；其餘當牌堆放中間，在牌堆的<b>四個角</b>各翻開 1 張。');
+    const onTable = d => slotOf.find(c => c && c.r === d.r && c.s === d.s);
+    const nm = c => ({'♠': '黑桃', '♥': '紅心', '♦': '方塊', '♣': '梅花'})[c.s] + ' ' + RN[c.r];
+    const collected = [[], [], [], []];
+    const collect = async (p, a, b, wait) => {
       sfx('coin');
-      [a, b].forEach((c, k) => place(c, {x: WON[p].x + (seats[p].nwon || 0) * 8 + k * 4, y: WON[p].y, rot: 0, sc: .62, z: 40 + (seats[p].nwon || 0) * 2 + k, up: true}));
-      seats[p].nwon = (seats[p].nwon || 0) + 2; await sleep(700);
+      [a, b].forEach(c => { const k = collected[p].length; collected[p].push(c); place(c, {x: WON[p].x + (k % 12) * 6, y: WON[p].y + Math.floor(k / 12) * 10, rot: 0, sc: .6, up: true}); });
+      await sleep(wait * .5);
     };
-    const play = async (p, r, s, matchIdx, msg) => {
-      turn(p); note(msg); await sleep(500);
-      const i = handC[p].findIndex(c => c.r === r && c.s === s); const c = handC[p].splice(i, 1)[0]; counts[p].set(handC[p].length);
-      if (matchIdx == null) { place(c, {x: slotsX[free], y: 330, z: 15, up: true}); sfx('flip'); tbl.push(c); free++; await sleep(800); return; }
-      const m = tbl[matchIdx]; glow(m);
-      place(c, {x: m.o.x + 16, y: m.o.y + 16, rot: 8, z: 30, up: true}); sfx('flip'); await sleep(700);
-      glow([m, c]); await sleep(500); glow([m, c], false);
-      tbl[matchIdx] = null; await collect(p, m, c);
-    };
-    const flipDeck = async (p, matchIdx, msg) => {
-      const c = deck.shift(); turn(p); note(msg);
-      place(c, {x: 760, y: 470, z: 30}); await sleep(300); await flip(c); await sleep(300);
-      if (matchIdx == null) { place(c, {x: slotsX[free], y: 330, z: 15}); tbl.push(c); free++; await sleep(700); return; }
-      const m = tbl[matchIdx]; glow([m, c]); place(c, {x: m.o.x + 16, y: m.o.y + 16, rot: -8, z: 30}); await sleep(700); glow([m, c], false);
-      tbl[matchIdx] = null; await collect(p, m, c);
+    const why = (c, t) => c.r >= 10 ? `${RN[c.r]} 配 ${RN[t.r]}` : `${c.r}＋${t.r}＝10`;
+    let seenFace = false;
+    const doMove = async (m, wait, talk) => {
+      const P = this.players[m.p]; turn(m.p);
+      let c;
+      if (m.kind === 'hand') { const i = H[m.p].findIndex(e => e.r === m.c.r && e.s === m.c.s); c = H[m.p].splice(i, 1)[0]; counts[m.p].set(H[m.p].length); }
+      else { c = pileC.shift(); pileCount.set(pileC.length); place(c, {x: D0.x, y: D0.y - 30, sc: .95}); await sleep(wait * .15); sfx('flip'); place(c, {up: true}); await sleep(wait * .25); }
+      if (m.t) {
+        const t = onTable(m.t); glow(t);
+        if (talk) note(`${P}${m.kind === 'hand' ? '出' : '翻到'}${nm(m.c)}：${why(m.c, m.t)}，收走${nm(m.t)}`);
+        sfx('deal'); place(c, {x: t.o.x + 16, y: t.o.y + 16, rot: 8, sc: .9, up: true}); await sleep(wait * .35);
+        glow([t, c]); await sleep(wait * .2); glow([t, c], false); liftFromTable(t);
+        await collect(m.p, t, c, wait);
+        if (m.c.r >= 10 && !seenFace && talk) { seenFace = true; chap(3); await cue('第 4 步　10、J、Q、K', '要配一樣的', '10、J、Q、K 不能湊 10，要<b>配一樣的</b>：10 配 10、J 配 J、Q 配 Q、K 配 K。'); }
+      } else {
+        if (talk) note(`${P}${m.kind === 'hand' ? '出' : '翻到'}${nm(m.c)}：沒有能配的 → 留在桌上`);
+        sfx('flip'); putOnTable(c); await sleep(wait * .6);
+      }
     };
     chap(1);
     await cue('第 2 步　出牌配 10', '加起來 10 就收走', '輪到你：出一張手牌，和桌上一張<b>加起來 10</b>，兩張一起收走。A+9、2+8、3+7、4+6、5+5。');
-    await play(0, 2, '♦', 1, '阿美出方塊 2：2＋8＝10，收走紅心 8');
+    await doMove(moves[0], 1800, true);
     chap(2);
-    await cue('第 3 步　翻牌堆', '再翻一張', '出完牌，再翻牌堆最上面一張：能配就收走，不能配就留在桌上。');
-    await flipDeck(0, 3, '阿美翻到梅花 4：4＋6＝10，收走方塊 6');
-    chap(3);
-    await play(1, 11, '♠', null, '阿雄出黑桃 J：桌上沒有 J → 留在桌上');
-    await cue('第 4 步　10、J、Q、K', '要配一樣的', '10、J、Q、K 不能湊 10，要<b>配一樣的</b>：10 配 10、J 配 J、K 配 K。');
-    await flipDeck(1, 2, '阿雄翻到紅心 K：K 配梅花 K，收走！');
-    await play(2, 7, '♦', 0, '阿珠出方塊 7：7＋3＝10，收走黑桃 3');
-    await flipDeck(2, null, '阿珠翻到紅心 5：沒有能配的 → 留在桌上');
-    await play(3, 5, '♣', tbl.length - 1, '阿德出梅花 5：5＋5＝10，收走紅心 5');
-    chap(4); turn(-1);
-    await cue('第 5 步　算紅點', '紅色牌才算分', '牌出完後，算自己收到的<b>紅色牌</b>：紅 A 20 分、紅 2–8 看數字、紅 9–K 10 分；黑桃 A 30 分，其他黑色 0 分。');
-    note('（示範到這裡）算算每個人收到的紅點');
-    const pts = [[8, 2], [10], [7], [5]]; // 阿美: 紅心8+方塊2 ; 阿雄: 紅心K ; 阿珠: 方塊7 ; 阿德: 紅心5
-    for (let p = 0; p < 4; p++) { const v = pts[p].reduce((a, b) => a + b, 0); setScore(p, v); floatTxt(pts[p].join('＋') + '＝' + v, SEAT[p].x, SEAT[p].y - 60); sfx('coin'); await sleep(700); }
-    crown(0); sfx('win'); note('這一段阿美 10 分最多。整副牌玩完：總分 240，超過 60 分就算贏！');
+    await cue('第 3 步　翻牌堆', '再翻一張', '出完牌，再翻牌堆最上面一張：能配就收走，不能配就留在桌上。然後換下一位。');
+    await doMove(moves[1], 1800, true);
+    let i = 2;
+    for (; i < 8; i++) await doMove(moves[i], 1700, true);
+    chap(4);
+    if (!seenFace) await cue('第 4 步　10、J、Q、K', '要配一樣的', '10、J、Q、K 不能湊 10，要<b>配一樣的</b>：10 配 10、K 配 K。');
+    await cue('第 5 步　快轉玩完', '一路玩到牌都出完', '後面照同樣規則：出一張、翻一張，我們<b>快轉</b>到最後。');
+    rnd('快轉 ▶▶'); const keep = ST.speed; ST.speed = keep * 4; stage.style.setProperty('--t', Math.round(600 / ST.speed) + 'ms');
+    try { for (; i < moves.length; i++) await doMove(moves[i], 1700, true); }
+    finally { ST.speed = keep; stage.style.setProperty('--t', Math.round(600 / keep) + 'ms'); }
+    turn(-1); rnd('');
+    note('手牌和牌堆都出完了，遊戲結束');
+    await sleep(800);
+    chap(5);
+    await cue('第 6 步　算紅點', '用阿美示範怎麼算', '把阿美收到的牌攤開：<b>紅色牌才算分</b>。紅 A 20、紅 2–8 看數字、紅 9–K 10；黑桃 A 30；其他黑色 0 分。');
+    // spread 阿美's cards across the table, red first
+    stage.querySelectorAll('.count').forEach(e => e.remove());
+    stage.querySelectorAll('.card').forEach(c => { if (!collected[0].includes(c)) c.classList.add('dim'); });
+    const mine = collected[0].slice().sort((a, b) => redVal(b) - redVal(a));
+    const per = Math.min(10, mine.length), row = Math.ceil(mine.length / per);
+    mine.forEach((c, k) => place(c, {x: 640 - (per - 1) * 41 + (k % per) * 82, y: 300 + Math.floor(k / per) * 120 - (row - 1) * 30, rot: 0, sc: .95, up: true}));
+    await sleep(900);
+    let sum = 0;
+    for (const c of mine) {
+      const v = redVal(c); sum += v;
+      if (v) { glow(c); sfx('coin'); } else c.classList.add('dim');
+      floatTxt(v ? '+' + v : '0', c.o.x, c.o.y - 50);
+      setScore(0, sum); note(`阿美：${nm(c)} ${v ? v + ' 分' : '黑色 0 分'}　累計 ${sum} 分`);
+      await sleep(v ? 750 : 380); glow(c, false);
+    }
+    await sleep(500);
+    await cue('阿美的紅點', `共 ${pts[0]} 分`, `其他人也一樣算：${this.players.slice(1).map((n, p) => `${n} ${pts[p + 1]} 分`).join('、')}。四人加起來 240 分，<b>超過 60 分就算贏</b>。`, 3400);
+    pts.forEach((v, p) => setScore(p, v));
+    const best = Math.max(...pts); crown(pts.indexOf(best)); sfx('win');
+    note(`${this.players[pts.indexOf(best)]} ${best} 分最高，獲勝！`);
     await cue('制勝關鍵', '先收紅色高分牌', this.key, 3200);
   }
 });
