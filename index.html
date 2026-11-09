@@ -50,8 +50,8 @@ section.game{padding:22px 0 10px}
 .bar .txt{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .bar .round{font-size:18px;color:#FFE2A8;flex:none}
 /* seats */
-.seat{position:absolute;width:170px;height:84px;margin:-42px 0 0 -85px;background:#FFFDF8;border-radius:16px;display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:box-shadow .3s,transform .3s;z-index:3000}
-.seat .av{width:52px;height:52px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff}
+.seat{position:absolute;width:186px;height:88px;margin:-44px 0 0 -93px;background:#FFFDF8;border-radius:16px;display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:box-shadow .3s,transform .3s;z-index:3000}
+.seat .av{width:70px;height:70px;border-radius:14px;flex:none;object-fit:cover;border:3px solid;background:#FFFDF8}
 .seat .nm{font-size:19px;font-weight:900;line-height:1.15}
 .seat .sc{font-size:16px;color:var(--body);font-weight:700}
 .seat .sc b{font-size:22px;color:var(--orange)}
@@ -179,6 +179,7 @@ footer .fb{display:inline-block;margin-top:8px;font-weight:700;color:#fff;backgr
       <button class="btn g" id="bRestart">↻ 從頭播</button>
       <button class="btn g" id="bSpeed">速度 1×</button>
       <button class="btn g" id="bSound">🔊 音效開</button>
+      <button class="btn g" id="bVoice">🗣 語音旁白開</button>
       <span class="sp"></span>
       <button class="btn g" id="bFull">⛶ 全螢幕</button>
     </div>
@@ -200,6 +201,7 @@ const stage = document.getElementById('stage');
 const ST = {run:0, paused:true, fast:false, speed:1, muted:false, startChap:0, playing:false};
 class Abort extends Error {}
 const COLORS = ['#E8552D', '#028090', '#7B5EA7', '#C98A12'];
+const AVATARS = ['av_f1', 'av_m1', 'av_f2', 'av_m2'];   // 阿嬤、阿公、阿嬤、阿公（ChatGPT 紙質貼紙頭像）
 // seats: bottom, left, top, right (clockwise order of play)
 const SEAT = [{x:640,y:662},{x:110,y:370},{x:640,y:104},{x:1170,y:370}];
 const FRONT = [{x:640,y:505},{x:300,y:370},{x:640,y:240},{x:980,y:370}];
@@ -262,6 +264,23 @@ const SFX = {
 };
 function sfx(n){ if (ST.fast || ST.muted || ST.paused) return; try { SFX[n](); } catch (e) {} }
 
+/* ---- voice: 字卡旁白（鍾孟修的聲音）與喊名字 ---- */
+// NARR: 字卡文字 → 語音檔，見 voice-src/ 與 build_voice.py
+const NARR = {};
+ST.voice = true; ST.audio = null;
+function stopVoice(){ if (ST.audio) { ST.audio.pause(); ST.audio = null; } }
+async function playVoice(src, wait = true){
+  if (ST.fast || ST.muted || !src) return;
+  stopVoice();
+  const a = new Audio(src); ST.audio = a; let done = false;
+  a.onended = a.onerror = () => { done = true; };
+  a.playbackRate = Math.min(1.5, Math.max(.75, ST.speed));
+  try { await a.play(); } catch (e) { done = true; }
+  if (!wait) return;
+  while (!done) await sleep(120 * ST.speed);
+  if (ST.audio === a) ST.audio = null;
+}
+
 /* ---- cards ---- */
 function suitRed(s){ return s === '♥' || s === '♦'; }
 function card(r, s, o = {}){
@@ -286,7 +305,7 @@ function glow(cs, on = true){ [].concat(cs).forEach(c => c.classList.toggle('glo
 /* ---- seats, scores, effects ---- */
 function buildSeats(names, scoreLabel = '分'){
   seats = names.map((n, i) => {
-    const s = at(el('seat', `<div class="av" style="background:${COLORS[i]}">${n[0]}</div><div><div class="nm">${n}</div><div class="sc"><b>0</b> ${scoreLabel}</div></div>`), SEAT[i].x, SEAT[i].y);
+    const s = at(el('seat', `<img class="av" src="img/${AVATARS[i]}.jpg" alt="${n}" style="border-color:${COLORS[i]}"><div><div class="nm">${n}</div><div class="sc"><b>0</b> ${scoreLabel}</div></div>`), SEAT[i].x, SEAT[i].y);
     return s;
   });
   scores = [0, 0, 0, 0];
@@ -302,8 +321,9 @@ async function hand(p, x, y){
   h.style.transform = `translate(${x - SEAT[p].x}px,${y - SEAT[p].y}px) scale(1.15)`;
   setTimeout(() => h.remove(), 900);
 }
-function bubble(p, t, orange){
+function bubble(p, t, orange, voice){
   if (ST.fast) return;
+  if (voice && !ST.muted) { const a = new Audio(voice); a.play().catch(() => {}); }
   const dx = [0, 150, 0, -150][p], dy = [-90, -70, 90, -70][p];
   const b = at(el('bubble' + (orange ? ' o' : ''), t), SEAT[p].x + dx, SEAT[p].y + dy);
   setTimeout(() => b.remove(), 1800 / ST.speed);
@@ -322,7 +342,9 @@ async function cue(k, title, text, hold = 2600){
   if (ST.fast) return;
   sfx('cue');
   const c = el('cue', `<span class="k">${k}</span><h3>${title}</h3><p>${text}</p>`);
-  try { await sleep(hold); } finally { c.classList.add('out'); setTimeout(() => c.remove(), 420); }
+  const src = ST.voice && NARR[text.replace(/<[^>]+>/g, '')];
+  try { await Promise.all([sleep(hold), src ? sleep(350).then(() => playVoice(src)) : null]); }
+  finally { c.classList.add('out'); setTimeout(() => c.remove(), 420); }
   await sleep(300);
 }
 function chap(i){
@@ -333,7 +355,7 @@ function chap(i){
 
 /* ---- runner ---- */
 async function run(startChap = 0){
-  ST.run++; const id = ST.run; ZT = 100;
+  ST.run++; const id = ST.run; ZT = 100; stopVoice();
   stage.innerHTML = ''; stage.className = '';
   el('felt'); bar();
   ST.fast = startChap > 0; ST.startChap = startChap; if (ST.fast) stage.classList.add('fast');
@@ -344,6 +366,7 @@ async function run(startChap = 0){
 }
 function setPlaying(on, ended){
   ST.paused = !on; ST.playing = on;
+  if (ST.audio) { on ? ST.audio.play().catch(() => {}) : ST.audio.pause(); }
   document.getElementById('bPlay').textContent = on ? '⏸ 暫停' : (ended ? '▶ 再看一次' : '▶ 播放示範');
   document.getElementById('bPlay').dataset.ended = ended ? '1' : '';
 }
@@ -356,6 +379,7 @@ document.getElementById('bPlay').onclick = () => {
 };
 document.getElementById('bRestart').onclick = () => { ac(); ST.started = true; setPlaying(true); run(0); };
 document.getElementById('bSpeed').onclick = e => { ST.speed = ST.speed === 1 ? 1.5 : ST.speed === 1.5 ? .75 : 1; e.target.textContent = `速度 ${ST.speed}×`; stage.style.setProperty('--t', Math.round(600 / ST.speed) + 'ms'); };
+document.getElementById('bVoice').onclick = e => { ST.voice = !ST.voice; e.target.textContent = ST.voice ? '🗣 語音旁白開' : '🗣 語音旁白關'; if (!ST.voice) stopVoice(); };
 document.getElementById('bSound').onclick = e => { ST.muted = !ST.muted; e.target.textContent = ST.muted ? '🔇 音效關' : '🔊 音效開'; };
 document.getElementById('bFull').onclick = () => { const b = document.getElementById('stagebox'); if (!document.fullscreenElement) b.requestFullscreen?.(); else document.exitFullscreen?.(); };
 document.addEventListener('fullscreenchange', () => setTimeout(fitStage, 60));
@@ -490,7 +514,7 @@ GAMES.push({
     const a5 = piles[0][piles[0].length - 1];
     glow([a5, c5]); sfx('buzz'); chap(2);
     note('苗栗草莓和大溪豆干都是 5！'); await sleep(500);
-    bubble(0, '大溪豆干！', true); sfx('shout'); await sleep(350); bubble(2, '苗栗草莓！'); await sleep(900);
+    bubble(0, '大溪豆干！', true, 'voice/shout_a_daxi.mp3'); sfx('shout'); await sleep(900); bubble(2, '苗栗草莓！', false, 'voice/shout_c_miaoli.mp3'); await sleep(1300);
     await cue('第 3 步　喊名字', '先喊對的人贏', '兩人面前最上面的牌一樣 → 搶著<b>喊對方的名字</b>。苗栗草莓先喊對！');
     glow([a5, c5], false); chap(3);
     // winner collects: own pile + C's pile → winner's hand; others take back their own
@@ -511,7 +535,7 @@ GAMES.push({
     H[0].unshift(card(9, '♠', {...stackPos(0, 9), up: false})); H[1].unshift(card(9, '♥', {...stackPos(1, 9), up: false}));
     const n9a = await throwCard(0); const n9b = await throwCard(1);
     glow([n9a, n9b]); sfx('buzz'); note('兩張 9！'); await sleep(400);
-    bubble(1, '苗栗草莓！', true); sfx('shout'); await sleep(350); bubble(0, '萬巒豬腳！'); await sleep(900);
+    bubble(1, '苗栗草莓！', true, 'voice/shout_b_miaoli.mp3'); sfx('shout'); await sleep(900); bubble(0, '萬巒豬腳！', false, 'voice/shout_a_wanluan.mp3'); await sleep(1300);
     note('萬巒豬腳先喊對 → 收走苗栗草莓的牌，下一回合由萬巒豬腳先出'); sfx('coin');
     glow([n9a, n9b], false);
     regather(1, piles[0]); regather(1, piles[1]); piles[0] = []; piles[1] = [];
@@ -991,7 +1015,7 @@ function miniHTML(m){
   }).join('');
 }
 function show(i){
-  G = GAMES[i]; ST.run++; ST.started = false; setPlaying(false);
+  G = GAMES[i]; ST.run++; stopVoice(); ST.started = false; setPlaying(false);
   document.querySelectorAll('.tab').forEach((t, j) => t.setAttribute('aria-selected', j === i));
   document.getElementById('gName').textContent = G.name;
   document.getElementById('gSub').textContent = G.sub;
