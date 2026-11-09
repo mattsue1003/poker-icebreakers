@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<title>撲克牌破冰 7 種玩法｜看動畫就會玩</title>
+<meta name="description" content="拍牌、喊名字、逆轉勝、去頭去尾、抽籤搶牌、排七、撿紅點：四人輪流的動畫示範，附音效、字卡、圖卡與現場抽籤器。鍾孟修 職能治療師。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --paper:#FBF7EF; --paper2:#F2ECDF; --card:#FFFDF8; --line:#E2D9C6;
+  --ink:#12343B; --body:#3F5157; --mute:#6B7A7E;
+  --orange:#E8552D; --amber:#F4A93C; --teal:#028090; --felt:#1F6B4F; --felt2:#185A42; --red:#C8102E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--paper)}
+body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--paper);line-height:1.6}
+a{color:var(--teal)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.hero{padding:36px 0 18px}
+.eyebrow{display:inline-block;font-size:15px;font-weight:700;color:#fff;background:var(--orange);padding:3px 14px;border-radius:999px;letter-spacing:1px}
+h1{font-size:clamp(30px,5vw,48px);font-weight:900;line-height:1.2;margin:12px 0 8px}
+.lead{font-size:clamp(17px,2.2vw,20px);color:var(--body);max-width:820px}
+.who{margin-top:10px;font-weight:700;color:var(--ink)}
+/* game tabs */
+nav.tabs{position:sticky;top:0;z-index:20;background:rgba(251,247,239,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+.tab{flex:none;font:inherit;font-size:17px;font-weight:700;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer;white-space:nowrap}
+.tab b{color:var(--orange);margin-right:6px}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab[aria-selected="true"] b{color:var(--amber)}
+/* game section */
+section.game{padding:22px 0 10px}
+.ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:12px}
+.ghead h2{font-size:clamp(26px,3.6vw,36px);font-weight:900}
+.ghead .sub{font-size:18px;color:var(--mute)}
+/* stage */
+.stagebox{position:relative;width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#20302C;box-shadow:0 10px 30px rgba(18,52,59,.18)}
+.stagebox:fullscreen{border-radius:0;background:#20302C}
+#stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;background:radial-gradient(ellipse at 50% 45%,#2C4A42 0,#1C2E2A 75%);overflow:hidden;--t:600ms}
+#stage.fast{--t:0ms}
+#stage.fast *{transition-duration:0ms!important;animation-duration:0ms!important}
+.felt{position:absolute;left:170px;top:140px;width:940px;height:460px;border-radius:230px;background:radial-gradient(ellipse at 50% 40%,var(--felt) 0,var(--felt2) 80%);box-shadow:inset 0 0 0 10px #7A4E2D,inset 0 0 0 14px #5C3A20,0 14px 40px rgba(0,0,0,.35)}
+.bar{position:absolute;left:0;right:0;top:0;height:58px;background:rgba(10,20,18,.72);color:#fff;display:flex;align-items:center;gap:14px;padding:0 20px;font-size:24px;font-weight:700;z-index:50}
+.bar .chip{font-size:17px;background:var(--amber);color:var(--ink);border-radius:999px;padding:2px 12px;flex:none}
+.bar .txt{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bar .round{font-size:18px;color:#FFE2A8;flex:none}
+/* seats */
+.seat{position:absolute;width:170px;height:84px;margin:-42px 0 0 -85px;background:#FFFDF8;border-radius:16px;display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:box-shadow .3s,transform .3s;z-index:30}
+.seat .av{width:52px;height:52px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff}
+.seat .nm{font-size:19px;font-weight:900;line-height:1.15}
+.seat .sc{font-size:16px;color:var(--body);font-weight:700}
+.seat .sc b{font-size:22px;color:var(--orange)}
+.seat.on{box-shadow:0 0 0 6px var(--amber),0 0 30px 8px rgba(244,169,60,.75);transform:scale(1.06)}
+.seat.win{box-shadow:0 0 0 6px #FFD54A,0 0 40px 10px rgba(255,213,74,.9)}
+.seat .crown{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:34px}
+.seat.bump .sc b{animation:bump .5s}
+@keyframes bump{50%{transform:scale(1.6)}}
+/* cards */
+.card{position:absolute;left:0;top:0;width:70px;height:98px;transition:transform var(--t) cubic-bezier(.3,.8,.3,1),opacity var(--t);will-change:transform;perspective:600px}
+.card .in{position:relative;width:100%;height:100%;transition:transform calc(var(--t)*.8);transform-style:preserve-3d}
+.card.up .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.back{background:#028090;border:3px solid #01646E;box-shadow:inset 0 0 0 4px #FFFDF8,inset 0 0 0 7px #9FD3D1}
+.front{background:#FFFDF8;border:2px solid #B9AF9C;transform:rotateY(180deg);color:#1B1B1B}
+.front.r{color:var(--red)}
+.front .rk{position:absolute;left:6px;top:2px;font-size:22px;font-weight:900;line-height:1.1}
+.front .st{position:absolute;left:0;right:0;top:34px;text-align:center;font-size:42px;line-height:1}
+.card.glow .face{box-shadow:0 0 0 4px var(--amber),0 0 22px 6px rgba(244,169,60,.8)}
+.card.dim{opacity:.35}
+.card.gone{opacity:0}
+.xmark{position:absolute;inset:-6px;display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--orange);font-weight:900;text-shadow:0 2px 4px rgba(0,0,0,.4)}
+/* effects */
+.float{position:absolute;font-size:40px;font-weight:900;color:#FFE066;text-shadow:0 3px 0 #B5480F,0 0 12px rgba(0,0,0,.4);z-index:60;pointer-events:none;animation:floatup 1.3s ease-out forwards;transform:translate(-50%,-50%)}
+@keyframes floatup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+.handfx{position:absolute;font-size:60px;z-index:55;transition:transform calc(var(--t)*.7) ease-in;pointer-events:none;margin:-30px 0 0 -30px}
+.bubble{position:absolute;background:#fff;color:var(--ink);font-size:26px;font-weight:900;border-radius:20px;padding:8px 18px;z-index:58;box-shadow:0 6px 16px rgba(0,0,0,.3);animation:pop .35s ease-out;white-space:nowrap;transform:translate(-50%,-50%)}
+.bubble.o{background:var(--orange);color:#fff}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}70%{transform:translate(-50%,-50%) scale(1.15);opacity:1}100%{transform:translate(-50%,-50%) scale(1)}}
+.label{position:absolute;transform:translate(-50%,-50%);font-size:20px;font-weight:700;color:#FFF3D6;z-index:25;white-space:nowrap;text-shadow:0 2px 4px rgba(0,0,0,.5)}
+.count{position:absolute;transform:translate(-50%,-50%);min-width:38px;height:38px;border-radius:19px;background:var(--orange);color:#fff;font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:40;padding:0 8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+/* big 字卡 */
+.cue{position:absolute;left:50%;top:50%;width:780px;transform:translate(-50%,-50%);background:#FFFDF8;border-radius:26px;padding:30px 40px 34px;z-index:80;box-shadow:0 20px 60px rgba(0,0,0,.45);border:5px solid var(--amber);animation:cuein .45s cubic-bezier(.2,.9,.3,1.2)}
+.cue .k{display:inline-block;font-size:20px;font-weight:900;color:#fff;background:var(--orange);border-radius:999px;padding:3px 16px}
+.cue h3{font-size:46px;font-weight:900;line-height:1.2;margin:10px 0 8px;color:var(--ink)}
+.cue p{font-size:28px;line-height:1.5;color:var(--body)}
+.cue.out{animation:cueout .4s ease-in forwards}
+@keyframes cuein{from{opacity:0;transform:translate(-50%,-40%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%)}}
+@keyframes cueout{to{opacity:0;transform:translate(-50%,-110%) scale(.6)}}
+/* slot machine (抽籤) */
+.slot{position:absolute;left:24px;top:76px;width:300px;background:linear-gradient(#FFE8B0,#F4A93C);border:5px solid #B5480F;border-radius:22px;padding:10px 12px 14px;z-index:45;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.slot h4{font-size:20px;font-weight:900;color:#7A2E0E;text-align:center}
+.slot .reels{display:flex;gap:8px;justify-content:center;margin-top:6px;min-height:104px;align-items:center}
+.slot .reel{width:72px;height:100px;background:#FFFDF8;border-radius:8px;border:2px solid #B9AF9C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1}
+.slot .reel .rk{font-size:26px}.slot .reel .st{font-size:40px}
+.slot .reel.r{color:var(--red)}
+.slot .reel.spin{animation:blink .14s infinite}
+@keyframes blink{50%{opacity:.6}}
+/* controls under stage */
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.btn{font:inherit;font-size:17px;font-weight:700;border:0;border-radius:12px;padding:9px 18px;cursor:pointer;background:var(--teal);color:#fff}
+.btn.o{background:var(--orange)}
+.btn.g{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.ctrl .sp{flex:1}
+/* 圖卡 (chapter cards) */
+.chaps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:6px 0 16px}
+.chap{font:inherit;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:border-color .2s,transform .2s}
+.chap:hover{transform:translateY(-2px)}
+.chap.on{border-color:var(--orange);box-shadow:0 0 0 3px rgba(232,85,45,.18)}
+.chap .n{font-size:14px;font-weight:900;color:var(--orange)}
+.chap .t{font-size:19px;font-weight:900;color:var(--ink);line-height:1.25}
+.chap .d{font-size:15px;color:var(--body);line-height:1.45}
+.mini{display:flex;gap:4px;height:46px;align-items:flex-end}
+.mc{width:32px;height:44px;border-radius:5px;border:1.5px solid #B9AF9C;background:#FFFDF8;font-size:14px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;color:#1B1B1B}
+.mc.r{color:var(--red)}
+.mc.b{background:#028090;border:2px solid #01646E;box-shadow:inset 0 0 0 2px #FFFDF8}
+.mc.hl{box-shadow:0 0 0 3px var(--amber)}
+.mc i{font-style:normal;font-size:12px}
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:12px}
+.rbox{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 18px}
+.rbox h3{font-size:20px;font-weight:900;margin-bottom:4px}
+.rbox.key{border-color:var(--amber);background:#FFF8E8}
+.rbox li{font-size:17px;color:var(--body);margin-left:1.2em}
+.rbox p{font-size:17px;color:var(--body)}
+/* live drawer */
+.live{background:#fff;border:3px solid var(--amber);border-radius:20px;padding:16px 18px;margin:8px 0 18px}
+.live h3{font-size:24px;font-weight:900}
+.live .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
+.live .drawn{display:flex;gap:12px;min-height:150px;align-items:center;flex-wrap:wrap}
+.bigc{width:100px;height:140px;border-radius:12px;border:3px solid #B9AF9C;background:#FFFDF8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1;animation:pop2 .4s ease-out}
+.bigc .rk{font-size:40px}.bigc .st{font-size:56px}
+.bigc.r{color:var(--red)}
+@keyframes pop2{from{transform:scale(.3) rotate(-15deg);opacity:0}to{transform:none;opacity:1}}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.team{border:2px solid var(--line);border-radius:14px;padding:8px 10px;text-align:center}
+.team input{font:inherit;font-size:17px;font-weight:700;border:0;border-bottom:2px dashed var(--line);width:100%;text-align:center;background:transparent;color:var(--ink)}
+.team .pts{font-size:40px;font-weight:900;color:var(--orange)}
+.team button{font:inherit;font-size:18px;font-weight:900;width:44px;height:38px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer}
+.stat{font-size:20px;font-weight:900}
+.stat b{color:var(--orange)}
+footer{border-top:1px solid var(--line);margin-top:20px;padding:22px 0 40px;color:var(--body)}
+footer .fb{display:inline-block;margin-top:8px;font-weight:700;color:#fff;background:#1F5FBF;border-radius:999px;padding:8px 18px;text-decoration:none}
+@media (max-width:640px){.btn{font-size:16px;padding:8px 14px}.chap .d{display:none}}
+@media (prefers-reduced-motion:reduce){.cue,.bubble,.float{animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="eyebrow">撲克牌破冰</span>
+  <h1>7 種撲克牌玩法，看動畫就會玩</h1>
+  <p class="lead">四個人圍一桌，輪流翻牌、出牌、得分的完整過程都做成動畫，搭配音效、字卡和圖卡。按「播放」看示範，點下面的圖卡可以直接跳到那一步。</p>
+  <p class="who">愛迪樂｜鍾孟修 職能治療師</p>
+</div></header>
+
+<nav class="tabs" aria-label="選擇玩法"><div class="wrap" id="tabs"></div></nav>
+
+<main class="wrap">
+  <section class="game" aria-live="polite">
+    <div class="ghead"><h2 id="gName"></h2><span class="sub" id="gSub"></span></div>
+    <div class="stagebox" id="stagebox"><div id="stage"></div></div>
+    <div class="ctrl">
+      <button class="btn o" id="bPlay">▶ 播放示範</button>
+      <button class="btn g" id="bRestart">↻ 從頭播</button>
+      <button class="btn g" id="bSpeed">速度 1×</button>
+      <button class="btn g" id="bSound">🔊 音效開</button>
+      <span class="sp"></span>
+      <button class="btn g" id="bFull">⛶ 全螢幕</button>
+    </div>
+    <div class="chaps" id="chaps" aria-label="圖卡：點一下跳到這一步"></div>
+    <div id="extra"></div>
+    <div class="rules" id="rules"></div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <p>同一副牌還能玩更多：形色棋、拉密、數字撞鐘、誰是牛頭王，見 <a href="https://mattsue1003.github.io/card-games-108/" target="_blank" rel="noopener">一副牌玩到底（108 張手繪卡）</a>。</p>
+  <p>想看更多教案？歡迎加入粉絲專頁，留言就能拿到教案連結。</p>
+  <a class="fb" href="https://www.facebook.com/profile.php?id=100063748491881" target="_blank" rel="noopener">臉書粉絲專頁：鍾孟修Matt-職能治療師 →</a>
+</div></footer>
+
+<script>
+/* ================= engine ================= */
+const stage = document.getElementById('stage');
+const ST = {run:0, paused:true, fast:false, speed:1, muted:false, startChap:0, playing:false};
+class Abort extends Error {}
+const COLORS = ['#E8552D', '#028090', '#7B5EA7', '#C98A12'];
+// seats: bottom, left, top, right (clockwise order of play)
+const SEAT = [{x:640,y:662},{x:110,y:370},{x:640,y:104},{x:1170,y:370}];
+const FRONT = [{x:640,y:505},{x:300,y:370},{x:640,y:240},{x:980,y:370}];
+const WON = [{x:840,y:662},{x:110,y:520},{x:840,y:104},{x:1170,y:520}];
+const HAND = [{x:440,y:662},{x:110,y:222},{x:440,y:104},{x:1170,y:222}];
+const CENTER = {x:640,y:370};
+const RN = ['', 'A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let seats = [], scores = [0,0,0,0], G = null;
+
+function fitStage(){ const b = document.getElementById('stagebox'); const k = Math.min(b.clientWidth / 1280, b.clientHeight / 720); stage.style.transform = `translate(${(b.clientWidth - 1280 * k) / 2}px,${(b.clientHeight - 720 * k) / 2}px) scale(${k})`; }
+addEventListener('resize', fitStage);
+
+function sleep(ms){
+  const id = ST.run;
+  return new Promise((res, rej) => {
+    if (id !== ST.run) return rej(new Abort());
+    if (ST.fast) return res();
+    let left = ms / ST.speed;
+    const tick = () => {
+      if (id !== ST.run) return rej(new Abort());
+      if (ST.paused) return setTimeout(tick, 120);
+      if (left <= 0) return res();
+      const d = Math.min(60, left); left -= d; setTimeout(tick, d);
+    };
+    tick();
+  });
+}
+function el(cls, html, parent = stage){ const e = document.createElement('div'); e.className = cls; if (html != null) e.innerHTML = html; parent.appendChild(e); return e; }
+function at(e, x, y){ e.style.left = x + 'px'; e.style.top = y + 'px'; return e; }
+
+/* ---- sound (WebAudio, no files) ---- */
+let AC;
+function ac(){ if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); return AC; }
+function tone(f, dur, type = 'sine', vol = .2, when = 0, slide){
+  const a = ac(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+}
+function noise(dur, vol = .3, freq = 2000, when = 0){
+  const a = ac(), n = a.createBufferSource(), b = a.createBuffer(1, Math.floor(a.sampleRate * dur), a.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+  const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; const g = a.createGain(); g.gain.value = vol;
+  n.buffer = b; n.connect(f).connect(g).connect(a.destination); n.start(a.currentTime + when);
+}
+const SFX = {
+  flip: () => noise(.07, .55, 3200),
+  deal: () => noise(.1, .35, 1600),
+  slap: () => { noise(.16, 1, 500); tone(110, .18, 'sine', .45); },
+  ding: () => { tone(880, .22, 'sine', .2); tone(1320, .35, 'sine', .18, .08); },
+  coin: () => { tone(988, .08, 'square', .08); tone(1319, .25, 'square', .08, .08); },
+  buzz: () => tone(150, .32, 'square', .07),
+  shuffle: () => { for (let i = 0; i < 9; i++) noise(.05, .3, 2600, i * .045); },
+  tick: () => tone(1400, .03, 'square', .04),
+  swap: () => tone(380, .4, 'sine', .16, 0, 950),
+  pop: () => tone(620, .12, 'sine', .15, 0, 320),
+  shout: () => { tone(520, .22, 'sawtooth', .06, 0, 760); },
+  cue: () => { tone(660, .12, 'triangle', .12); tone(990, .2, 'triangle', .12, .1); },
+  win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .32, 'triangle', .17, i * .13)),
+};
+function sfx(n){ if (ST.fast || ST.muted || ST.paused) return; try { SFX[n](); } catch (e) {} }
+
+/* ---- cards ---- */
+function suitRed(s){ return s === '♥' || s === '♦'; }
+function card(r, s, o = {}){
+  const c = el('card', `<div class="in"><div class="face back"></div><div class="face front${suitRed(s) ? ' r' : ''}"><div class="rk">${RN[r] || ''}</div><div class="st">${s || ''}</div></div></div>`);
+  c.r = r; c.s = s; c.o = {x: CENTER.x, y: CENTER.y, rot: 0, sc: 1, up: false, z: 10, ...o};
+  place(c, {}); return c;
+}
+function place(c, o){
+  Object.assign(c.o, o);
+  const {x, y, rot, sc, up, z} = c.o;
+  c.style.transform = `translate(${x - 35}px,${y - 49}px) rotate(${rot}deg) scale(${sc})`;
+  c.style.zIndex = z; c.classList.toggle('up', !!up);
+  return c;
+}
+async function move(c, o, wait = 380){ place(c, o); await sleep(wait); }
+async function flip(c, up = true){ sfx('flip'); place(c, {up}); await sleep(420); }
+function glow(cs, on = true){ [].concat(cs).forEach(c => c.classList.toggle('glow', on)); }
+
+/* ---- seats, scores, effects ---- */
+function buildSeats(names, scoreLabel = '分'){
+  seats = names.map((n, i) => {
+    const s = at(el('seat', `<div class="av" style="background:${COLORS[i]}">${n[0]}</div><div><div class="nm">${n}</div><div class="sc"><b>0</b> ${scoreLabel}</div></div>`), SEAT[i].x, SEAT[i].y);
+    return s;
+  });
+  scores = [0, 0, 0, 0];
+}
+function turn(p){ seats.forEach((s, i) => s.classList.toggle('on', i === p)); }
+function setScore(p, v){ scores[p] = v; const b = seats[p].querySelector('.sc b'); b.textContent = v; seats[p].classList.remove('bump'); void seats[p].offsetWidth; seats[p].classList.add('bump'); }
+function addScore(p, d, x, y){ setScore(p, scores[p] + d); if (!ST.fast) { floatTxt((d > 0 ? '+' : '') + d, x ?? SEAT[p].x, (y ?? SEAT[p].y) - 50); } }
+function floatTxt(t, x, y){ const f = at(el('float', t), x, y); setTimeout(() => f.remove(), 1400); }
+async function hand(p, x, y){
+  if (ST.fast) return;
+  const h = at(el('handfx', '✋'), SEAT[p].x, SEAT[p].y);
+  h.style.transform = 'translate(0,0) scale(.6)'; await sleep(30);
+  h.style.transform = `translate(${x - SEAT[p].x}px,${y - SEAT[p].y}px) scale(1.15)`;
+  setTimeout(() => h.remove(), 900);
+}
+function bubble(p, t, orange){
+  if (ST.fast) return;
+  const dx = [0, 150, 0, -150][p], dy = [-90, -70, 90, -70][p];
+  const b = at(el('bubble' + (orange ? ' o' : ''), t), SEAT[p].x + dx, SEAT[p].y + dy);
+  setTimeout(() => b.remove(), 1800 / ST.speed);
+}
+function label(t, x, y){ return at(el('label', t), x, y); }
+function count(x, y, n){ const c = at(el('count', n), x, y); c.set = v => c.textContent = v; return c; }
+function crown(p){ seats[p].classList.add('win'); el('crown', '👑', seats[p]); }
+
+/* ---- 字卡 / 說明列 / 圖卡 ---- */
+let barTxt, barChip, barRound;
+function bar(){ const b = el('bar', '<span class="chip"></span><span class="txt"></span><span class="round"></span>'); barChip = b.children[0]; barTxt = b.children[1]; barRound = b.children[2]; }
+function note(t){ barTxt.textContent = t; }
+function rnd(t){ barRound.textContent = t; }
+async function cue(k, title, text, hold = 2600){
+  note(title + '：' + text.replace(/<[^>]+>/g, ''));
+  if (ST.fast) return;
+  sfx('cue');
+  const c = el('cue', `<span class="k">${k}</span><h3>${title}</h3><p>${text}</p>`);
+  try { await sleep(hold); } finally { c.classList.add('out'); setTimeout(() => c.remove(), 420); }
+  await sleep(300);
+}
+function chap(i){
+  document.querySelectorAll('.chap').forEach((c, j) => c.classList.toggle('on', j === i));
+  barChip.textContent = `第 ${i + 1} 步　${G.chapters[i].t}`;
+  if (ST.fast && i >= ST.startChap) { ST.fast = false; stage.classList.remove('fast'); }
+}
+
+/* ---- runner ---- */
+async function run(startChap = 0){
+  ST.run++; const id = ST.run;
+  stage.innerHTML = ''; stage.className = '';
+  el('felt'); bar();
+  ST.fast = startChap > 0; ST.startChap = startChap; if (ST.fast) stage.classList.add('fast');
+  try {
+    await G.script();
+    if (id === ST.run) { turn(-1); setPlaying(false, true); }
+  } catch (e) { if (!(e instanceof Abort)) console.error(e); }
+}
+function setPlaying(on, ended){
+  ST.paused = !on; ST.playing = on;
+  document.getElementById('bPlay').textContent = on ? '⏸ 暫停' : (ended ? '▶ 再看一次' : '▶ 播放示範');
+  document.getElementById('bPlay').dataset.ended = ended ? '1' : '';
+}
+document.getElementById('bPlay').onclick = () => {
+  ac();
+  const b = document.getElementById('bPlay');
+  if (b.dataset.ended) { b.dataset.ended = ''; setPlaying(true); run(0); return; }
+  if (!ST.started) { ST.started = true; setPlaying(true); run(0); return; }
+  setPlaying(ST.paused);
+};
+document.getElementById('bRestart').onclick = () => { ac(); ST.started = true; setPlaying(true); run(0); };
+document.getElementById('bSpeed').onclick = e => { ST.speed = ST.speed === 1 ? 1.5 : ST.speed === 1.5 ? .75 : 1; e.target.textContent = `速度 ${ST.speed}×`; stage.style.setProperty('--t', Math.round(600 / ST.speed) + 'ms'); };
+document.getElementById('bSound').onclick = e => { ST.muted = !ST.muted; e.target.textContent = ST.muted ? '🔇 音效關' : '🔊 音效開'; };
+document.getElementById('bFull').onclick = () => { const b = document.getElementById('stagebox'); if (!document.fullscreenElement) b.requestFullscreen?.(); else document.exitFullscreen?.(); };
+document.addEventListener('fullscreenchange', () => setTimeout(fitStage, 60));
+
+/* ---- helpers for games ---- */
+const D = (r, s) => ({r, s});
+function shuffleAnim(){ sfx('shuffle'); }
+async function dealTo(list, wait = 110){ // list of [cardEl, target]
+  for (const [c, o] of list) { sfx('deal'); place(c, o); await sleep(wait); }
+}
+function countPos(p){ return p === 0 ? [HAND[0].x, HAND[0].y - 64] : p === 2 ? [HAND[2].x, HAND[2].y + 64] : [HAND[p].x + 48, HAND[p].y]; }
+function labelPos(p){ return p === 0 ? [HAND[0].x, HAND[0].y - 102] : p === 2 ? [HAND[2].x, HAND[2].y + 102] : [HAND[p].x, HAND[p].y - 82]; }
+function stackPos(p, i){ const h = HAND[p]; const vert = p === 1 || p === 3; return {x: h.x + (vert ? 0 : i * 1.5), y: h.y + (vert ? i * 1.5 : 0) - i * .8, rot: 0, z: 20 + i}; }
+function clearFx(){ stage.querySelectorAll('.bubble,.float,.handfx').forEach(e => e.remove()); }
+
+/* ================= games ================= */
+const GAMES = [];
+
+/* 1. 拍牌遊戲 */
+GAMES.push({
+  id: 'slap', name: '拍牌遊戲', sub: '翻牌拍拍樂：看到一樣的就拍',
+  players: ['阿美', '阿雄', '阿珠', '阿德'],
+  chapters: [
+    {t: '準備', d: '整副牌蓋著，散開鋪在桌上', mini: ['b', 'b', 'b', 'b']},
+    {t: '開始', d: '四人輪流，一次翻開一張', mini: ['5♠', 'b', 'K♥', 'b']},
+    {t: '得分', d: '兩張一樣：兩個人各拍一張，各得 1 分', mini: ['5♠*', '5♦*']},
+    {t: '結束', d: '桌上剩 8 張就結束，分數最高的贏', mini: ['b', 'Q♠', 'b', '7♥']},
+  ],
+  rules: [
+    ['怎麼玩', ['整副牌蓋著散在桌上（示範用 16 張）。', '四人輪流，每人每次翻開一張；翻開的牌不再蓋回去。', '出現兩張數字一樣（花色不同也算），大家馬上拍。']],
+    ['怎麼得分', ['<b>一個人最多拍一張。</b>', '兩張一樣 → 兩個人各拍到一張，各得 1 分，所以每次有兩個人得分。', '拍錯：暫停一輪。']],
+    ['什麼時候結束', ['桌上剩下 <b>8 張</b>就結束。', '分數最高的人贏。']],
+  ],
+  key: '眼睛不要只看自己翻的牌：記住桌上已經翻開的數字，新牌一出現就知道要拍哪一張。',
+  async script(){
+    buildSeats(this.players);
+    chap(0);
+    const deal = [D(5,'♠'),D(12,'♠'),D(6,'♣'),D(9,'♣'),D(2,'♠'),D(13,'♥'),D(4,'♦'),D(9,'♦'),D(3,'♣'),D(7,'♥'),D(5,'♦'),D(8,'♠'),D(2,'♥'),D(10,'♣'),D(13,'♣'),D(6,'♥')];
+    const cs = deal.map(d => card(d.r, d.s));
+    shuffleAnim(); await sleep(500);
+    const pos = cs.map((c, i) => ({x: 420 + (i % 4) * 147 + ((i * 37) % 23) - 11, y: 215 + Math.floor(i / 4) * 102 + ((i * 53) % 19) - 9, rot: ((i * 29) % 21) - 10, z: 10}));
+    await dealTo(cs.map((c, i) => [c, pos[i]]), 90);
+    const left = count(1110, 170, 16); label('桌上', 1110, 128);
+    await cue('第 1 步　準備', '牌蓋著散開', '整副牌洗好，<b>蓋著</b>散開鋪在桌上。示範用 16 張。');
+    chap(1);
+    await cue('第 2 步　開始', '輪流翻一張', '從阿美開始，順時針輪流，每人每次翻開一張。<b>翻開就不再蓋回去。</b>');
+    const plays = [ // [player who flips, card index, match?]
+      [0, 0], [1, 5], [2, 10, {with: 0, slap: [1, 3]}], [3, 3], [0, 12], [1, 7, {with: 3, slap: [0, 2]}],
+      [2, 1], [3, 14, {with: 5, slap: [0, 3]}], [0, 9], [1, 4, {with: 12, slap: [1, 3]}],
+    ];
+    let n = 16, firstScore = true;
+    for (const [p, ci, m] of plays) {
+      turn(p); note(`輪到${this.players[p]}：翻開一張`);
+      await sleep(500); await flip(cs[ci]); await sleep(350);
+      if (!m) { note(`${RN[cs[ci].r]} 沒有一樣的 → 放著，換下一位`); await sleep(650); continue; }
+      const a = cs[m.with], b = cs[ci];
+      glow([a, b]); sfx('buzz');
+      if (firstScore) { chap(2); }
+      note(`出現兩張 ${RN[b.r]}！快拍！`); await sleep(500);
+      const [p1, p2] = m.slap;
+      hand(p1, a.o.x, a.o.y); hand(p2, b.o.x, b.o.y); await sleep(350); sfx('slap');
+      await sleep(250);
+      glow([a, b], false);
+      place(a, {x: WON[p1].x, y: WON[p1].y, rot: 0, sc: .7, z: 30 + scores[p1]});
+      place(b, {x: WON[p2].x, y: WON[p2].y, rot: 0, sc: .7, z: 30 + scores[p2]});
+      addScore(p1, 1); addScore(p2, 1); sfx('coin');
+      n -= 2; left.set(n);
+      if (firstScore) {
+        firstScore = false; await sleep(700);
+        await cue('第 3 步　得分', '兩個人各拍一張', '<b>一個人最多拍一張。</b>兩張一樣 → 兩個人各拍到一張，<b>各得 1 分</b>。');
+      } else await sleep(900);
+    }
+    turn(-1); chap(3);
+    await cue('第 4 步　結束', '桌上剩 8 張就結束', '數一數：桌上只剩 <b>8 張</b>，遊戲結束。分數最高的人贏！');
+    const best = Math.max(...scores); scores.forEach((s, i) => { if (s === best) crown(i); });
+    sfx('win'); note(`阿德 3 分最高，獲勝！`);
+    await cue('制勝關鍵', '記住桌上的牌', this.key, 3200);
+  }
+});
+
+/* 2. 喊名字 */
+GAMES.push({
+  id: 'names', name: '喊名字遊戲', sub: '一樣的牌出現，喊出對方的名字',
+  players: ['苗栗草莓', '萬巒豬腳', '大溪豆干', '台南虱目魚'],
+  chapters: [
+    {t: '取名字、發牌', d: '每人取台灣特色名字，牌平均發完', mini: ['b', 'b', 'b']},
+    {t: '開始', d: '輪流翻一張，蓋在自己的牌上', mini: ['3♠', '8♥', 'J♣']},
+    {t: '喊名字得分', d: '兩張一樣，搶著喊對方名字', mini: ['5♣*', '5♥*']},
+    {t: '收牌、贏的人先出', d: '贏的收走對方的牌，由他先出', mini: ['b', 'b', 'b', 'b']},
+    {t: '結束', d: '玩 10 回合，或有人沒牌就結束', mini: ['b', 'b']},
+  ],
+  rules: [
+    ['怎麼玩', ['每人自己取一個台灣特色名字，例如苗栗草莓、萬巒豬腳。', '牌平均發完，蓋著拿在手上。', '順時針輪流，翻一張丟在自己面前，新牌蓋在原本的牌上。']],
+    ['怎麼得分', ['兩人面前最上面的牌數字一樣 → 搶著<b>喊對方的名字</b>。', '先喊對的人，把對方丟出來的牌全部收走。', '其他人把自己丟出的牌收回去，大家重新洗牌。', '<b>得到對方牌的人，下一回合由他先出。</b>']],
+    ['什麼時候結束', ['玩 <b>10 回合</b>，或有人手上沒有牌就結束。', '手上牌最多的人贏。']],
+  ],
+  key: '一邊翻牌一邊看別人面前的牌，名字要先在心裡默念好；越快喊對，收的牌越多。',
+  async script(){
+    buildSeats(this.players, '張');
+    chap(0);
+    await cue('第 1 步　取名字', '自己取一個台灣特色名字', '形容詞或地名＋名詞：<b>苗栗草莓、萬巒豬腳、大溪豆干、台南虱目魚</b>。');
+    const order = [[3,'♠'],[8,'♥'],[11,'♣'],[6,'♦'],[5,'♣'],[12,'♦'],[5,'♥'],[2,'♣'],[9,'♠'],[9,'♥'],[4,'♦'],[10,'♣'],[7,'♠'],[1,'♥'],[13,'♦'],[3,'♣'],[8,'♠'],[2,'♥'],[6,'♣'],[11,'♦'],[4,'♠'],[7,'♥'],[12,'♣'],[10,'♦']];
+    // hands[p] = cards from top (index 0 = next to flip)
+    const H = [[], [], [], []];
+    const tops = {0: [[3,'♠'],[5,'♣'],[9,'♠']], 1: [[8,'♥'],[12,'♦'],[9,'♥']], 2: [[11,'♣'],[5,'♥']], 3: [[6,'♦']]};
+    const filler = [[2,'♣'],[4,'♦'],[10,'♣'],[7,'♠'],[1,'♥'],[13,'♦'],[3,'♣'],[8,'♠'],[2,'♥'],[6,'♣'],[11,'♦'],[4,'♠'],[7,'♥'],[12,'♣'],[10,'♦']];
+    let fi = 0;
+    for (let p = 0; p < 4; p++) { const t = tops[p]; while (t.length < 6) t.push(filler[fi++]); H[p] = t.map(([r, s]) => card(r, s)); }
+    shuffleAnim(); await sleep(400);
+    const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 0));
+    for (let i = 0; i < 6; i++) for (let p = 0; p < 4; p++) {
+      const c = H[p][5 - i]; sfx('deal'); place(c, stackPos(p, i)); counts[p].set(i + 1); setScore(p, i + 1); await sleep(70);
+    }
+    note('牌平均發完，每人 6 張（示範用）');
+    await sleep(600);
+    chap(1);
+    await cue('第 2 步　開始', '輪流翻一張', '順時針輪流：翻開手上最上面一張，丟在自己面前；下一輪的牌<b>蓋在原本的牌上面</b>。');
+    const piles = [[], [], [], []];
+    let round = 1;
+    const throwCard = async p => {
+      const c = H[p].shift(); piles[p].push(c);
+      turn(p); counts[p].set(H[p].length); setScore(p, H[p].length);
+      sfx('flip'); place(c, {x: FRONT[p].x + piles[p].length * 3, y: FRONT[p].y - piles[p].length * 2, rot: (piles[p].length * 7) % 11 - 5, z: 30 + piles[p].length, up: true});
+      await sleep(800);
+      return c;
+    };
+    rnd('第 1 回合 / 10');
+    for (const p of [0, 1, 2, 3]) await throwCard(p);
+    note('四張都不一樣 → 繼續下一輪');
+    await sleep(700);
+    await throwCard(0); await throwCard(1); const c5 = await throwCard(2);
+    const a5 = piles[0][piles[0].length - 1];
+    glow([a5, c5]); sfx('buzz'); chap(2);
+    note('苗栗草莓和大溪豆干都是 5！'); await sleep(500);
+    bubble(0, '大溪豆干！', true); sfx('shout'); await sleep(350); bubble(2, '苗栗草莓！'); await sleep(900);
+    await cue('第 3 步　喊名字', '先喊對的人贏', '兩人面前最上面的牌一樣 → 搶著<b>喊對方的名字</b>。苗栗草莓先喊對！');
+    glow([a5, c5], false); chap(3);
+    // winner collects: own pile + C's pile → winner's hand; others take back their own
+    const regather = (p, cardsIn) => { cardsIn.forEach(c => { H[p].push(c); place(c, {up: false}); }); };
+    note('苗栗草莓收走大溪豆干丟出的牌'); sfx('coin');
+    regather(0, piles[2]); regather(0, piles[0]); piles[2] = []; piles[0] = [];
+    H[0].forEach((c, i) => place(c, stackPos(0, i)));
+    counts[0].set(H[0].length); setScore(0, H[0].length); floatTxt('+2', SEAT[0].x, SEAT[0].y - 60);
+    await sleep(900);
+    note('其他人把自己丟出的牌收回去');
+    regather(1, piles[1]); regather(3, piles[3]); piles[1] = []; piles[3] = [];
+    [1, 3].forEach(p => { H[p].forEach((c, i) => place(c, stackPos(p, i))); counts[p].set(H[p].length); setScore(p, H[p].length); });
+    counts[2].set(H[2].length); setScore(2, H[2].length);
+    await sleep(700); sfx('shuffle'); note('大家重新洗牌'); await sleep(800);
+    await cue('第 4 步　贏的人先出', '得到對方的牌，就由你先出', '苗栗草莓收到牌 → <b>下一回合由苗栗草莓先出</b>，再順時針。');
+    rnd('第 2 回合 / 10');
+    // round 2: 苗栗草莓 leads; mock the next two flips so 9 and 9 meet
+    H[0].unshift(card(9, '♠', {...stackPos(0, 9), up: false})); H[1].unshift(card(9, '♥', {...stackPos(1, 9), up: false}));
+    const n9a = await throwCard(0); const n9b = await throwCard(1);
+    glow([n9a, n9b]); sfx('buzz'); note('兩張 9！'); await sleep(400);
+    bubble(1, '苗栗草莓！', true); sfx('shout'); await sleep(350); bubble(0, '萬巒豬腳！'); await sleep(900);
+    note('萬巒豬腳先喊對 → 收走苗栗草莓的牌，下一回合由萬巒豬腳先出'); sfx('coin');
+    glow([n9a, n9b], false);
+    regather(1, piles[0]); regather(1, piles[1]); piles[0] = []; piles[1] = [];
+    H[1].forEach((c, i) => place(c, stackPos(1, i)));
+    [0, 1].forEach(p => { counts[p].set(H[p].length); setScore(p, H[p].length); });
+    floatTxt('+1', SEAT[1].x, SEAT[1].y - 60);
+    await sleep(1400);
+    chap(4);
+    await cue('第 5 步　結束', '10 回合，或有人沒牌', '玩到第 <b>10 回合</b>，或有人手上沒有牌就結束。<b>手上牌最多的人贏。</b>');
+    rnd('第 10 回合 / 10');
+    note('（快轉到最後）數一數手上的牌');
+    const fin = [8, 10, 0, 6];
+    fin.forEach((v, p) => { counts[p].set(v); setScore(p, v); });
+    await sleep(600); crown(1); sfx('win');
+    note('萬巒豬腳 10 張最多，獲勝！大溪豆干沒牌了，遊戲結束。');
+    await cue('制勝關鍵', '名字先默念好', this.key, 3200);
+  }
+});
+
+/* 3 & 4. 逆轉勝 / 去頭去尾 (shared) */
+function roundGame(mode){
+  const isSwap = mode === 'swap';
+  return {
+    id: isSwap ? 'swap' : 'cut',
+    name: isSwap ? '去頭去尾' : '逆轉勝',
+    sub: isSwap ? '最大、最小互換' : '最大、最小去掉，只有中間的人得分',
+    players: ['阿美', '阿雄', '阿珠', '阿德'],
+    chapters: [
+      {t: '發牌', d: '每人拿自己花色的 A–K', mini: ['A♠', 'A♥', 'A♦', 'A♣']},
+      {t: '開始', d: '每輪同時蓋一張，一起翻開', mini: ['b', 'b', 'b', 'b']},
+      {t: '得分', d: isSwap ? '最大、最小互換分數' : '最大、最小去掉', mini: isSwap ? ['K♠*', '9♥', '5♦', '2♣*'] : ['K♠x', '9♥', '5♦', '2♣x']},
+      {t: '比不出大小時', d: isSwap ? '同點數：不交換' : '同點數：一起去掉', mini: isSwap ? ['Q♥', 'Q♦', '3♠'] : ['Q♥x', 'Q♦x', '3♠x']},
+      {t: '制勝關鍵', d: isSwap ? '小牌也能換到大分數' : '中間大小最安全', mini: ['7♠', '8♥']},
+      {t: '結束', d: '13 張出完，分數最高的贏', mini: ['K♠', 'K♥', 'K♦', 'K♣']},
+    ],
+    rules: isSwap ? [
+      ['怎麼發牌', ['四人一組，每人拿一種花色的 A–K（13 張）。', 'A＝1、J＝11、Q＝12、K＝13。']],
+      ['怎麼得分', ['每輪大家同時蓋一張，一起翻開。', '<b>出最大和出最小的人交換牌</b>，中間兩人拿回自己的牌。', '拿到的牌，點數就是分數。', '比不出最大或最小（同點數）→ 不交換，各自拿回。']],
+      ['什麼時候結束', ['13 張都出完，累計分數最高的人贏。']],
+    ] : [
+      ['怎麼發牌', ['四人一組，每人拿一種花色的 A–K（13 張）。', 'A＝1、J＝11、Q＝12、K＝13。']],
+      ['怎麼得分', ['每輪大家同時蓋一張，一起翻開。', '<b>最大和最小的牌都去掉、沒有分數。</b>', '只有中間的人得分，點數就是分數。', '一樣大或一樣小 → 全部一起去掉。']],
+      ['什麼時候結束', ['13 張都出完，累計分數最高的人贏。']],
+    ],
+    key: isSwap
+      ? '出很小的牌，可能換到別人的大牌（小兵立大功）；大牌要小心被換走。記住別人用掉哪些大牌、小牌。'
+      : '出中間大小的牌最容易得分；太大、太小都會被去掉。記住別人還剩哪些牌，K 和 A 留到最後再用。',
+    async script(){
+      buildSeats(this.players);
+      chap(0);
+      const SU = ['♠', '♥', '♦', '♣'], SN = ['黑桃', '愛心', '方塊', '梅花'];
+      await cue('第 1 步　發牌', '每人拿一種花色', '阿美拿<b>黑桃</b>、阿雄拿<b>愛心</b>、阿珠拿<b>方塊</b>、阿德拿<b>梅花</b>，各 A 到 K 共 13 張。');
+      const hands = [[], [], [], []];
+      for (let r = 1; r <= 13; r++) for (let p = 0; p < 4; p++) hands[p].push(card(r, SU[p]));
+      sfx('shuffle');
+      for (let r = 0; r < 13; r++) { for (let p = 0; p < 4; p++) place(hands[p][r], stackPos(p, r)); sfx('deal'); await sleep(55); }
+      const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 13));
+      [0, 1, 2, 3].forEach(p => label(SN[p] + ' A–K', ...labelPos(p)));
+      await sleep(500);
+      chap(1);
+      await cue('第 2 步　開始', '同時蓋一張，一起翻開', '每一輪，四個人各選一張牌<b>蓋著</b>放到前面，數「1、2、3」一起翻開。');
+      const take = (p, r) => { const i = hands[p].findIndex(c => c.r === r); const c = hands[p].splice(i, 1)[0]; counts[p].set(hands[p].length); return c; };
+      const rounds = isSwap
+        ? [[13, 9, 5, 2], [3, 12, 12, 7], [6, 1, 10, 4]]
+        : [[13, 9, 5, 2], [3, 12, 12, 7], [1, 1, 10, 6]];
+      for (let ri = 0; ri < rounds.length; ri++) {
+        const vals = rounds[ri]; rnd(`第 ${ri + 1} 輪 / 13`);
+        if (ri === 1) chap(3); if (ri === 0) note('大家各選一張，蓋著出牌');
+        const cs = [];
+        for (let p = 0; p < 4; p++) { turn(p); const c = take(p, vals[p]); cs.push(c); sfx('deal'); place(c, {x: FRONT[p].x, y: FRONT[p].y, rot: 0, sc: 1.1, z: 40}); await sleep(380); }
+        turn(-1); note('1、2、3，一起翻開！'); await sleep(500);
+        sfx('flip'); cs.forEach(c => place(c, {up: true})); await sleep(800);
+        const mx = Math.max(...vals), mn = Math.min(...vals);
+        const maxP = [0, 1, 2, 3].filter(p => vals[p] === mx), minP = [0, 1, 2, 3].filter(p => vals[p] === mn);
+        if (ri === 0) chap(2);
+        glow(maxP.map(p => cs[p]).concat(minP.map(p => cs[p])));
+        note(`最大 ${RN[mx]}${maxP.length > 1 ? '（兩張一樣）' : ''}、最小 ${RN[mn]}${minP.length > 1 ? '（兩張一樣）' : ''}`);
+        await sleep(1000);
+        if (isSwap) {
+          if (maxP.length === 1 && minP.length === 1) {
+            const a = maxP[0], b = minP[0]; sfx('swap');
+            const pa = {...cs[a].o}, pb = {...cs[b].o};
+            place(cs[a], {x: pb.x, y: pb.y}); place(cs[b], {x: pa.x, y: pa.y}); await sleep(900);
+            [cs[a], cs[b]] = [cs[b], cs[a]];
+            note(`最大、最小互換：${this.players[a]}拿到 ${RN[mn]}，${this.players[b]}拿到 ${RN[mx]}`);
+          } else {
+            sfx('buzz'); note('比不出誰最大（或最小）→ 不交換，各自拿回自己的牌'); await sleep(600);
+          }
+          glow(cs, false); await sleep(500);
+          for (let p = 0; p < 4; p++) { addScore(p, cs[p].r, cs[p].o.x, cs[p].o.y); }
+          sfx('coin');
+        } else {
+          const out = new Set([...maxP, ...minP]);
+          out.forEach(p => { cs[p].classList.add('dim'); el('xmark', '✕', cs[p]); }); sfx('buzz');
+          note(maxP.length > 1 || minP.length > 1 ? '一樣大或一樣小 → 全部一起去掉' : '最大、最小去掉，只有中間的人得分');
+          await sleep(800); glow(cs, false);
+          for (let p = 0; p < 4; p++) if (!out.has(p)) addScore(p, cs[p].r, cs[p].o.x, cs[p].o.y);
+          sfx('coin');
+        }
+        await sleep(1100);
+        if (ri === 0) await cue('第 3 步　得分', isSwap ? '最大、最小互換' : '最大、最小去掉',
+          isSwap ? '出 <b>K（13）</b>的阿美和出 <b>2</b> 的阿德交換：阿美只得 2 分，阿德得 13 分！中間兩人拿回自己的牌。'
+                 : '出 <b>K</b> 和出 <b>2</b> 的牌都去掉、沒有分數；只有中間的阿雄得 9 分、阿珠得 5 分。');
+        if (ri === 1) await cue('第 4 步　比不出大小', isSwap ? '同點數就不交換' : '同點數一起去掉',
+          isSwap ? '兩張 Q 一樣大，比不出誰最大 → <b>不交換</b>，大家各自拿回自己的牌。'
+                 : '兩張 Q 一樣大 → <b>兩張都去掉</b>；最小的 3 也去掉，只有阿德得 7 分。');
+        cs.forEach(c => { place(c, {x: WON[[0, 1, 2, 3].find(p => cs[p] === c)].x, y: WON[[0, 1, 2, 3].find(p => cs[p] === c)].y, sc: .6, z: 20}); c.classList.add('gone'); });
+        await sleep(500); cs.forEach(c => c.remove());
+      }
+      chap(4);
+      await cue('第 5 步　制勝關鍵', isSwap ? '小牌也能逆轉' : '中間最安全', this.key, 3600);
+      chap(5);
+      await cue('第 6 步　結束', '13 張出完', '13 輪都出完，把分數加起來，<b>最高分的人贏</b>。');
+      rnd('第 13 輪 / 13'); note('（快轉到最後）總分');
+      const fin = isSwap ? [41, 52, 47, 39] : [28, 35, 44, 31];
+      fin.forEach((v, p) => setScore(p, v)); counts.forEach(c => c.set(0));
+      const best = Math.max(...fin); crown(fin.indexOf(best)); sfx('win');
+      note(`${this.players[fin.indexOf(best)]} ${best} 分最高，獲勝！`);
+      await sleep(2500);
+    }
+  };
+}
+GAMES.push(roundGame('cut'));   // 先教逆轉勝
+GAMES.push(roundGame('swap'));  // 再教去頭去尾
+
+/* 5. 抽籤搶牌 */
+GAMES.push({
+  id: 'grab', name: '抽籤搶牌', sub: '抽籤機抽到哪張，就搶哪張',
+  players: ['阿美', '阿雄', '阿珠', '阿德'],
+  chapters: [
+    {t: '散牌', d: '牌翻開，散在桌上', mini: ['7♥', 'Q♠', '3♦']},
+    {t: '抽籤', d: '抽籤機抽出一張', mini: ['7♥*']},
+    {t: '搶牌得分', d: '先搶到一模一樣那張的人得 1 分', mini: ['7♥*']},
+    {t: '逐步加難度', d: '1–3 回合抽 1 張、4–6 抽 2 張、7–10 抽 3 張', mini: ['Q♠', '3♦', 'A♣']},
+    {t: '結束', d: '10 回合後，最高分的贏', mini: ['K♥', 'K♠']},
+  ],
+  rules: [
+    ['怎麼準備', ['整副牌<b>翻開</b>，散在桌子中間。', '四個人圍著桌子坐好，手先放在膝蓋上。']],
+    ['怎麼玩、怎麼得分', ['抽籤機抽出一張牌（用下面的「現場抽籤器」）。', '大家看畫面，<b>搶桌上一模一樣的那張</b>（同花色、同數字）。', '先搶到的人得 1 分，牌拿到自己面前。']],
+    ['逐步增加挑戰', ['第 1–3 回合：每次抽 <b>1 張</b>。', '第 4–6 回合：每次抽 <b>2 張</b>。', '第 7–10 回合：每次抽 <b>3 張</b>。']],
+    ['什麼時候結束', ['玩 <b>10 回合</b>，最高分的人贏。', '簡單版：只看數字、不看花色。']],
+  ],
+  key: '先看花色、再看數字：紅色牌往桌上紅色的區域找，視線由近到遠掃一遍，比亂看快很多。',
+  async script(){
+    buildSeats(this.players);
+    chap(0);
+    const deck = [];
+    for (const s of ['♠', '♥', '♦', '♣']) for (let r = 1; r <= 13; r++) deck.push(D(r, s));
+    // fixed demo layout: 24 cards
+    const pick = [[7,'♥'],[12,'♠'],[3,'♦'],[1,'♣'],[9,'♠'],[5,'♥'],[11,'♦'],[2,'♣'],[13,'♥'],[6,'♠'],[10,'♦'],[4,'♣'],[8,'♥'],[1,'♠'],[12,'♦'],[3,'♣'],[6,'♥'],[13,'♠'],[2,'♦'],[9,'♣'],[4,'♥'],[11,'♠'],[5,'♦'],[7,'♣']];
+    const cs = pick.map(([r, s]) => card(r, s));
+    sfx('shuffle'); await sleep(400);
+    const pos = cs.map((c, i) => ({x: 395 + (i % 6) * 98 + ((i * 41) % 17) - 8, y: 225 + Math.floor(i / 6) * 100 + ((i * 23) % 15) - 7, rot: ((i * 31) % 25) - 12, z: 10, up: true}));
+    await dealTo(cs.map((c, i) => [c, pos[i]]), 70);
+    await cue('第 1 步　散牌', '牌翻開，散在桌上', '整副牌<b>翻開</b>散在桌子中間（示範用 24 張），大家手放膝蓋上準備。');
+    const slot = el('slot', '<h4>🎰 抽籤機</h4><div class="reels"></div>');
+    const reels = slot.querySelector('.reels');
+    const showReels = (list, spinning) => {
+      reels.innerHTML = list.map(([r, s]) => `<div class="reel${suitRed(s) ? ' r' : ''}${spinning ? ' spin' : ''}"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`).join('');
+    };
+    const spin = async targets => {
+      for (let k = 0; k < 14; k++) { showReels(targets.map(() => pick[Math.floor(Math.random() * pick.length)]), true); sfx('tick'); await sleep(70 + k * 6); }
+      showReels(targets, false); sfx('ding'); await sleep(600);
+    };
+    const find = ([r, s]) => cs.find(c => c.r === r && c.s === s);
+    const grab = async (targets, who) => {
+      const tc = targets.map(find); glow(tc);
+      note('看清楚，搶一模一樣的那張！'); await sleep(500);
+      who.forEach((p, i) => hand(p, tc[i].o.x, tc[i].o.y)); await sleep(380); sfx('slap'); await sleep(200);
+      glow(tc, false);
+      who.forEach((p, i) => { place(tc[i], {x: WON[p].x + scores[p] * 4, y: WON[p].y, rot: 0, sc: .7, z: 30 + scores[p]}); addScore(p, 1); });
+      sfx('coin'); await sleep(900);
+    };
+    chap(1); rnd('第 1 回合 / 10');
+    await cue('第 2 步　抽籤', '抽籤機抽一張', '帶領者按抽籤機，畫面停在哪一張，大家就去找那一張。');
+    await spin([[7, '♥']]);
+    chap(2);
+    await grab([[7, '♥']], [2]);
+    await cue('第 3 步　搶牌得分', '先搶到的得 1 分', '阿珠先摸到 <b>紅心 7</b>，得 1 分，牌放到自己面前。');
+    rnd('第 2 回合 / 10'); await spin([[12, '♠']]); await grab([[12, '♠']], [0]);
+    chap(3);
+    await cue('第 4 步　逐步加難度', '抽的張數越來越多', '第 1–3 回合抽 <b>1 張</b>，第 4–6 回合抽 <b>2 張</b>，第 7–10 回合抽 <b>3 張</b>。');
+    rnd('第 4 回合 / 10（抽 2 張）'); await spin([[3, '♦'], [9, '♣']]); await grab([[3, '♦'], [9, '♣']], [1, 3]);
+    rnd('第 7 回合 / 10（抽 3 張）'); await spin([[13, '♥'], [1, '♣'], [6, '♠']]); await grab([[13, '♥'], [1, '♣'], [6, '♠']], [3, 2, 3]);
+    chap(4);
+    await cue('第 5 步　結束', '10 回合後比分數', '玩完第 <b>10 回合</b>，分數最高的人贏。');
+    rnd('第 10 回合 / 10'); note('（快轉到最後）');
+    [4, 5, 6, 8].forEach((v, p) => setScore(p, v)); crown(3); sfx('win'); note('阿德 8 分最高，獲勝！');
+    await cue('制勝關鍵', '先看花色再看數字', this.key, 3200);
+  }
+});
+
+/* 6. 排七 */
+GAMES.push({
+  id: 'sevens', name: '排七', sub: '從 7 開始，往上往下接龍',
+  players: ['阿美', '阿雄', '阿珠', '阿德'],
+  chapters: [
+    {t: '發牌', d: '整副 52 張，每人 13 張', mini: ['b', 'b', 'b']},
+    {t: '誰先出', d: '拿到黑桃 7 的人先出', mini: ['7♠*']},
+    {t: '怎麼出牌', d: '從 7 往上接 8、9…，往下接 6、5…', mini: ['6♠', '7♠', '8♠']},
+    {t: '沒牌可接', d: '蓋一張牌在自己面前', mini: ['b*']},
+    {t: '結束算分', d: '蓋牌加總，分數最少的贏', mini: ['K♣', 'Q♦']},
+  ],
+  rules: [
+    ['怎麼發牌', ['4 人，整副 52 張發完，每人 13 張。']],
+    ['怎麼開始', ['拿到<b>黑桃 7</b> 的人先出，再順時針輪流。']],
+    ['怎麼出牌', ['每種花色從 7 開始：往上接 8、9…K，往下接 6、5…A。', '其他花色的 7 隨時可以出。', '有牌能接就一定要出一張。', '<b>沒牌可接</b>：選一張牌蓋在自己面前。']],
+    ['怎麼得分、結束', ['大家手牌出完就結束。', '翻開自己蓋的牌加總（A＝1、J＝11、Q＝12、K＝13）。', '<b>分數最少的人贏。</b>']],
+  ],
+  key: '手上的 A、K 這種「頭尾牌」可以先卡著別人；不得不蓋牌時，蓋點數小的。',
+  async script(){
+    buildSeats(this.players, '張');
+    chap(0);
+    const SU = ['♠', '♥', '♦', '♣'];
+    const all = []; for (const s of SU) for (let r = 1; r <= 13; r++) all.push(D(r, s));
+    // hands chosen so the demo plays out: 阿美 has 7♠
+    const want = {0: [[7,'♠'],[8,'♥'],[6,'♦'],[9,'♥']], 1: [[8,'♠'],[7,'♦'],[5,'♠'],[10,'♠']], 2: [[7,'♥'],[9,'♠'],[6,'♥'],[7,'♣']], 3: [[6,'♠'],[13,'♣'],[12,'♦'],[1,'♥']]};
+    const used = new Set(Object.values(want).flat().map(([r, s]) => r + s));
+    const rest = all.filter(d => !used.has(d.r + d.s));
+    const H = [[], [], [], []];
+    for (let p = 0; p < 4; p++) { const list = want[p].map(([r, s]) => D(r, s)); while (list.length < 13) list.push(rest.shift()); H[p] = list.map(d => card(d.r, d.s)); }
+    sfx('shuffle'); await sleep(400);
+    const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 0));
+    for (let i = 0; i < 13; i++) for (let p = 0; p < 4; p++) { sfx('deal'); place(H[p][i], stackPos(p, i)); counts[p].set(i + 1); setScore(p, i + 1); await sleep(32); }
+    await cue('第 1 步　發牌', '每人 13 張', '整副 52 張洗好，一人一張輪流發，發完每人 <b>13 張</b>。');
+    // rows on the table
+    const rowY = {'♠': 235, '♥': 315, '♦': 395, '♣': 475};
+    const slotX = r => 640 + (r - 7) * 56;
+    Object.entries(rowY).forEach(([s, y]) => label(s, 258, y));
+    chap(1);
+    const takeC = (p, r, s) => { const i = H[p].findIndex(c => c.r === r && c.s === s); const c = H[p].splice(i, 1)[0]; counts[p].set(H[p].length); setScore(p, H[p].length); return c; };
+    const playC = async (p, r, s, msg) => {
+      turn(p); note(msg); await sleep(450);
+      const c = takeC(p, r, s); sfx('deal');
+      place(c, {x: slotX(r), y: rowY[s], rot: 0, sc: .78, z: 20 + r, up: true}); await sleep(380); sfx('flip'); await sleep(500);
+      return c;
+    };
+    turn(0);
+    await cue('第 2 步　誰先出', '黑桃 7 先出', '大家看看手上：拿到 <b>黑桃 7</b> 的阿美先出，再順時針輪流。');
+    const s7 = await playC(0, 7, '♠', '阿美出黑桃 7'); glow(s7); await sleep(500); glow(s7, false);
+    chap(2);
+    await cue('第 3 步　怎麼出牌', '從 7 往兩邊接', '同一花色：往上接 <b>8、9…K</b>，往下接 <b>6、5…A</b>。其他花色的 7 隨時可以出。');
+    await playC(1, 8, '♠', '阿雄接黑桃 8');
+    await playC(2, 7, '♥', '阿珠出紅心 7，開一排新的');
+    await playC(3, 6, '♠', '阿德接黑桃 6');
+    await playC(0, 8, '♥', '阿美接紅心 8');
+    await playC(1, 7, '♦', '阿雄出方塊 7');
+    await playC(2, 9, '♠', '阿珠接黑桃 9');
+    chap(3);
+    turn(3); note('阿德：手上沒有能接的牌……'); await sleep(900); sfx('buzz');
+    const cov = takeC(3, 13, '♣'); place(cov, {x: WON[3].x, y: WON[3].y, rot: 8, sc: .8, z: 30, up: false}); sfx('deal'); await sleep(700);
+    await cue('第 4 步　沒牌可接', '蓋一張在自己面前', '有牌能接一定要出；<b>都不能接</b>，就選一張牌<b>蓋著</b>放在自己面前，最後要算分。');
+    await playC(0, 6, '♦', '阿美接方塊 6');
+    await playC(1, 5, '♠', '阿雄接黑桃 5');
+    await playC(2, 6, '♥', '阿珠接紅心 6');
+    turn(3); note('阿德又不能接 → 再蓋一張'); await sleep(700); sfx('buzz');
+    const cov2 = takeC(3, 12, '♦'); place(cov2, {x: WON[3].x + 10, y: WON[3].y + 6, rot: -6, sc: .8, z: 31, up: false}); sfx('deal'); await sleep(900);
+    chap(4);
+    await cue('第 5 步　結束算分', '蓋牌加總，越少越好', '大家輪流接到手牌出完。翻開自己<b>蓋起來的牌</b>加總，<b>分數最少的人贏</b>。');
+    note('（快轉到最後）翻開蓋牌加總'); rnd('');
+    counts.forEach(c => c.set(0));
+    await flip(cov); await flip(cov2);
+    const pts = [0, 4, 1, 25];
+    buildScoresAs(pts, ['0', '4', '1', '13＋12＝25']);
+    crown(0); sfx('win'); note('阿美沒有蓋牌，0 分最少，獲勝！');
+    await cue('制勝關鍵', '頭尾牌卡人、蓋小牌', this.key, 3200);
+  }
+});
+function buildScoresAs(vals, txt){ vals.forEach((v, p) => { seats[p].querySelector('.sc').innerHTML = `<b>${v}</b> 分`; floatTxt(txt[p] + ' 分', SEAT[p].x, SEAT[p].y - 60); }); sfx('coin'); }
+
+/* 7. 撿紅點 */
+GAMES.push({
+  id: 'red', name: '撿紅點', sub: '湊成 10 就收走，比紅色牌的分數',
+  players: ['阿美', '阿雄', '阿珠', '阿德'],
+  chapters: [
+    {t: '發牌', d: '每人 6 張，桌上翻開 4 張', mini: ['b', '3♠', '8♥', 'K♣']},
+    {t: '出牌配 10', d: '手牌和桌上的牌加起來 10 就收走', mini: ['2♦*', '8♥*']},
+    {t: '翻牌堆', d: '再翻一張，能配也收走', mini: ['b', '4♣']},
+    {t: '10、J、Q、K', d: '要配一樣的：K 配 K', mini: ['K♥*', 'K♣*']},
+    {t: '算紅點', d: '紅色牌算分，A 20、9–K 10', mini: ['A♥', '8♥', 'K♦']},
+  ],
+  rules: [
+    ['怎麼發牌', ['4 人，每人 <b>6 張</b>。', '桌子中間翻開 <b>4 張</b>，其餘蓋成牌堆。']],
+    ['怎麼出牌、收牌', ['輪到你：出一張手牌，和桌上一張<b>加起來 10</b> 就兩張收走（A+9、2+8、3+7、4+6、5+5）。', '<b>10、J、Q、K</b> 要配一樣的：10 配 10、K 配 K。', '配不到：這張留在桌上。', '接著翻牌堆最上面一張，能配就收走，不能配就留在桌上。']],
+    ['怎麼得分', ['紅心、方塊 A：20 分', '紅心、方塊 2–8：看數字', '紅心、方塊 9–K：10 分', '黑桃 A：30 分（各地不同，先約定）；其他黑色牌 0 分']],
+    ['什麼時候結束', ['牌都出完就結束，紅點分數最高的人贏。', '全副 240 分，4 人平均 60 分。']],
+  ],
+  key: '先收紅色、分數高的牌（紅 A、紅 9–K）；黑色牌能收就收，免得留在桌上讓別人湊。',
+  async script(){
+    buildSeats(this.players);
+    chap(0);
+    const H = [[[2,'♦'],[11,'♥'],[3,'♣'],[8,'♣'],[1,'♥'],[10,'♠']], [[11,'♠'],[4,'♥'],[9,'♣'],[6,'♣'],[12,'♥'],[2,'♠']], [[7,'♦'],[1,'♠'],[10,'♥'],[5,'♠'],[8,'♦'],[12,'♣']], [[5,'♣'],[3,'♥'],[13,'♠'],[9,'♦'],[4,'♠'],[6,'♠']]];
+    const handC = H.map(h => h.map(([r, s]) => card(r, s)));
+    const tableD = [[3,'♠'],[8,'♥'],[13,'♣'],[6,'♦']];
+    const deckD = [[4,'♣'],[13,'♥'],[5,'♥'],[9,'♥']];
+    sfx('shuffle'); await sleep(400);
+    const counts = [0, 1, 2, 3].map(p => count(...countPos(p), 0));
+    for (let i = 0; i < 6; i++) for (let p = 0; p < 4; p++) { sfx('deal'); place(handC[p][i], stackPos(p, i)); counts[p].set(i + 1); await sleep(60); }
+    const slotsX = [430, 520, 610, 700, 790, 880];
+    const table = tableD.map(([r, s], i) => card(r, s));
+    for (let i = 0; i < 4; i++) { sfx('deal'); place(table[i], {x: slotsX[i], y: 330, z: 15}); await sleep(160); await flip(table[i]); }
+    const deck = deckD.map(([r, s], i) => card(r, s, {x: 640, y: 470, z: 12 - i}));
+    for (let i = 0; i < 6; i++) card(0, '', {x: 640 + i * .5, y: 470 - i * .8, z: 5 + i});
+    label('牌堆', 640, 540);
+    await cue('第 1 步　發牌', '每人 6 張，桌上 4 張', '每人發 <b>6 張</b>，桌子中間翻開 <b>4 張</b>，其餘蓋著當牌堆。');
+    let free = 4; // next free slot index for cards left on the table
+    const tbl = table.slice();
+    const collect = async (p, a, b) => {
+      sfx('coin');
+      [a, b].forEach((c, k) => place(c, {x: WON[p].x + (seats[p].nwon || 0) * 8 + k * 4, y: WON[p].y, rot: 0, sc: .62, z: 40 + (seats[p].nwon || 0) * 2 + k, up: true}));
+      seats[p].nwon = (seats[p].nwon || 0) + 2; await sleep(700);
+    };
+    const play = async (p, r, s, matchIdx, msg) => {
+      turn(p); note(msg); await sleep(500);
+      const i = handC[p].findIndex(c => c.r === r && c.s === s); const c = handC[p].splice(i, 1)[0]; counts[p].set(handC[p].length);
+      if (matchIdx == null) { place(c, {x: slotsX[free], y: 330, z: 15, up: true}); sfx('flip'); tbl.push(c); free++; await sleep(800); return; }
+      const m = tbl[matchIdx]; glow(m);
+      place(c, {x: m.o.x + 16, y: m.o.y + 16, rot: 8, z: 30, up: true}); sfx('flip'); await sleep(700);
+      glow([m, c]); await sleep(500); glow([m, c], false);
+      tbl[matchIdx] = null; await collect(p, m, c);
+    };
+    const flipDeck = async (p, matchIdx, msg) => {
+      const c = deck.shift(); turn(p); note(msg);
+      place(c, {x: 760, y: 470, z: 30}); await sleep(300); await flip(c); await sleep(300);
+      if (matchIdx == null) { place(c, {x: slotsX[free], y: 330, z: 15}); tbl.push(c); free++; await sleep(700); return; }
+      const m = tbl[matchIdx]; glow([m, c]); place(c, {x: m.o.x + 16, y: m.o.y + 16, rot: -8, z: 30}); await sleep(700); glow([m, c], false);
+      tbl[matchIdx] = null; await collect(p, m, c);
+    };
+    chap(1);
+    await cue('第 2 步　出牌配 10', '加起來 10 就收走', '輪到你：出一張手牌，和桌上一張<b>加起來 10</b>，兩張一起收走。A+9、2+8、3+7、4+6、5+5。');
+    await play(0, 2, '♦', 1, '阿美出方塊 2：2＋8＝10，收走紅心 8');
+    chap(2);
+    await cue('第 3 步　翻牌堆', '再翻一張', '出完牌，再翻牌堆最上面一張：能配就收走，不能配就留在桌上。');
+    await flipDeck(0, 3, '阿美翻到梅花 4：4＋6＝10，收走方塊 6');
+    chap(3);
+    await play(1, 11, '♠', null, '阿雄出黑桃 J：桌上沒有 J → 留在桌上');
+    await cue('第 4 步　10、J、Q、K', '要配一樣的', '10、J、Q、K 不能湊 10，要<b>配一樣的</b>：10 配 10、J 配 J、K 配 K。');
+    await flipDeck(1, 2, '阿雄翻到紅心 K：K 配梅花 K，收走！');
+    await play(2, 7, '♦', 0, '阿珠出方塊 7：7＋3＝10，收走黑桃 3');
+    await flipDeck(2, null, '阿珠翻到紅心 5：沒有能配的 → 留在桌上');
+    await play(3, 5, '♣', tbl.length - 1, '阿德出梅花 5：5＋5＝10，收走紅心 5');
+    chap(4); turn(-1);
+    await cue('第 5 步　算紅點', '紅色牌才算分', '牌出完後，算自己收到的<b>紅色牌</b>：紅 A 20 分、紅 2–8 看數字、紅 9–K 10 分；黑桃 A 30 分，其他黑色 0 分。');
+    note('（示範到這裡）算算每個人收到的紅點');
+    const pts = [[8, 2], [10], [7], [5]]; // 阿美: 紅心8+方塊2 ; 阿雄: 紅心K ; 阿珠: 方塊7 ; 阿德: 紅心5
+    for (let p = 0; p < 4; p++) { const v = pts[p].reduce((a, b) => a + b, 0); setScore(p, v); floatTxt(pts[p].join('＋') + '＝' + v, SEAT[p].x, SEAT[p].y - 60); sfx('coin'); await sleep(700); }
+    crown(0); sfx('win'); note('這一段阿美 10 分最多。整副牌玩完：總分 240，超過 60 分就算贏！');
+    await cue('制勝關鍵', '先收紅色高分牌', this.key, 3200);
+  }
+});
+
+/* ================= page ================= */
+function miniHTML(m){
+  return m.map(t => {
+    if (t === 'b' || t === 'b*') return `<span class="mc b${t.endsWith('*') ? ' hl' : ''}"></span>`;
+    const hl = t.endsWith('*'), x = t.endsWith('x'); const core = t.replace(/[*x]$/, '');
+    const s = core.slice(-1), r = core.slice(0, -1);
+    return `<span class="mc${suitRed(s) ? ' r' : ''}${hl ? ' hl' : ''}"${x ? ' style="opacity:.45"' : ''}>${r}<i>${s}</i></span>`;
+  }).join('');
+}
+function show(i){
+  G = GAMES[i]; ST.run++; ST.started = false; setPlaying(false);
+  document.querySelectorAll('.tab').forEach((t, j) => t.setAttribute('aria-selected', j === i));
+  document.getElementById('gName').textContent = G.name;
+  document.getElementById('gSub').textContent = G.sub;
+  document.getElementById('chaps').innerHTML = G.chapters.map((c, j) => `<button class="chap" data-j="${j}"><span class="n">圖卡 ${j + 1}</span><span class="mini">${miniHTML(c.mini)}</span><span class="t">${c.t}</span><span class="d">${c.d}</span></button>`).join('');
+  document.querySelectorAll('.chap').forEach(b => b.onclick = () => { ac(); ST.started = true; setPlaying(true); run(+b.dataset.j); });
+  document.getElementById('rules').innerHTML = G.rules.map(([h, li]) => `<div class="rbox"><h3>${h}</h3><ul>${li.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')
+    + `<div class="rbox key"><h3>制勝關鍵</h3><p>${G.key}</p></div>`;
+  document.getElementById('extra').innerHTML = G.id === 'grab' ? LIVE_HTML : '';
+  if (G.id === 'grab') initLive();
+  // static first frame
+  stage.innerHTML = ''; el('felt'); bar(); buildSeats(G.players, ['names', 'sevens'].includes(G.id) ? '張' : '分');
+  note('按「▶ 播放示範」開始，或點下面的圖卡跳到那一步'); barChip.textContent = G.name;
+  history.replaceState(null, '', '#' + G.id);
+  fitStage();
+}
+document.getElementById('tabs').innerHTML = GAMES.map((g, i) => `<button class="tab" role="tab" data-i="${i}"><b>${i + 1}</b>${g.name}</button>`).join('');
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(+t.dataset.i));
+
+/* ---- 現場抽籤器 (抽籤搶牌) ---- */
+const LIVE_HTML = `<div class="live">
+  <h3>🎰 現場抽籤器</h3>
+  <p class="note">按「抽牌」：第 1–3 回合抽 1 張、第 4–6 回合抽 2 張、第 7–10 回合抽 3 張。抽過的牌不會再出現。</p>
+  <div class="row"><button class="btn o" id="lvDraw">抽牌</button><span class="stat">第 <b id="lvRound">0</b> / 10 回合　這回合抽 <b id="lvN">1</b> 張</span><button class="btn g" id="lvReset">重新開始</button></div>
+  <div class="drawn" id="lvCards"></div>
+  <div class="teams" id="lvTeams"></div>
+</div>`;
+function initLive(){
+  let deck = [], round = 0; const pts = [0, 0, 0, 0];
+  const fresh = () => { deck = []; for (const s of ['♠', '♥', '♦', '♣']) for (let r = 1; r <= 13; r++) deck.push([r, s]); round = 0; pts.fill(0); upd(); document.getElementById('lvCards').innerHTML = ''; };
+  const nFor = r => r <= 3 ? 1 : r <= 6 ? 2 : 3;
+  const upd = () => {
+    document.getElementById('lvRound').textContent = round;
+    document.getElementById('lvN').textContent = nFor(Math.min(round + 1, 10));
+    document.getElementById('lvDraw').disabled = round >= 10;
+    document.getElementById('lvTeams').innerHTML = pts.map((v, i) => `<div class="team"><input value="${['第 1 組', '第 2 組', '第 3 組', '第 4 組'][i]}" aria-label="組名"><div class="pts">${v}</div><button data-i="${i}" data-d="-1">−</button> <button data-i="${i}" data-d="1">＋</button></div>`).join('');
+    document.querySelectorAll('#lvTeams button').forEach(b => b.onclick = () => { pts[b.dataset.i] = Math.max(0, pts[b.dataset.i] + +b.dataset.d); if (+b.dataset.d > 0) { try { ST.muted || SFX.coin(); } catch (e) {} } upd(); });
+  };
+  document.getElementById('lvDraw').onclick = async () => {
+    ac(); if (round >= 10) return; round++; const n = nFor(round);
+    const box = document.getElementById('lvCards'); box.innerHTML = '';
+    for (let k = 0; k < 10; k++) { if (!ST.muted) SFX.tick(); box.innerHTML = Array.from({length: n}, () => { const [r, s] = deck[Math.floor(Math.random() * deck.length)]; return `<div class="bigc${suitRed(s) ? ' r' : ''}" style="animation:none;opacity:.6"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`; }).join(''); await new Promise(r => setTimeout(r, 70)); }
+    const got = []; for (let k = 0; k < n; k++) got.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
+    box.innerHTML = got.map(([r, s]) => `<div class="bigc${suitRed(s) ? ' r' : ''}"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`).join('');
+    if (!ST.muted) SFX.ding();
+    if (round === 10 && !ST.muted) setTimeout(() => SFX.win(), 600);
+    upd();
+  };
+  document.getElementById('lvReset').onclick = fresh;
+  fresh();
+}
+
+const start = Math.max(0, GAMES.findIndex(g => '#' + g.id === location.hash));
+show(start);
+</script>
+</body>
+</html>
