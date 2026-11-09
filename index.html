@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:,">
 <title>撲克牌破冰 7 種玩法｜看動畫就會玩</title>
-<meta name="description" content="拍牌、喊名字、逆轉勝、去頭去尾、抽籤搶牌、排七、撿紅點：四人輪流的動畫示範，附音效、字卡、圖卡與現場抽籤器。鍾孟修 職能治療師。">
+<meta name="description" content="拍牌、喊名字、逆轉勝、去頭去尾、抽籤搶牌、排七、撿紅點：四人輪流的動畫示範，附音效、字卡、圖卡，抽籤搶牌搭配撲克拉霸抽籤器。鍾孟修 職能治療師。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
@@ -91,15 +91,38 @@ section.game{padding:22px 0 10px}
 .cue.out{animation:cueout .4s ease-in forwards}
 @keyframes cuein{from{opacity:0;transform:translate(-50%,-40%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%)}}
 @keyframes cueout{to{opacity:0;transform:translate(-50%,-110%) scale(.6)}}
-/* slot machine (抽籤) */
-.slot{position:absolute;left:24px;top:76px;width:300px;background:linear-gradient(#FFE8B0,#F4A93C);border:5px solid #B5480F;border-radius:22px;padding:10px 12px 14px;z-index:45;box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.slot h4{font-size:20px;font-weight:900;color:#7A2E0E;text-align:center}
-.slot .reels{display:flex;gap:8px;justify-content:center;margin-top:6px;min-height:104px;align-items:center}
-.slot .reel{width:72px;height:100px;background:#FFFDF8;border-radius:8px;border:2px solid #B9AF9C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1}
-.slot .reel .rk{font-size:26px}.slot .reel .st{font-size:40px}
-.slot .reel.r{color:var(--red)}
-.slot .reel.spin{animation:blink .14s infinite}
-@keyframes blink{50%{opacity:.6}}
+/* 撲克拉霸抽籤器 (drawn like mattsue1003.github.io/pokerrandom) */
+.pr{position:absolute;left:18px;top:62px;width:390px;padding:6px 50px 8px 12px;border-radius:18px;z-index:45;background:radial-gradient(circle at 20% 10%,#1a2a6c,#b21f1f 60%,#fdbb2d);box-shadow:0 8px 24px rgba(0,0,0,.45);color:#fff}
+.pr h4{font-size:19px;font-weight:900;color:#FFD700;text-align:center;text-shadow:0 2px 3px rgba(0,0,0,.5)}
+.pr .opts{display:flex;gap:8px;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin:2px 0 4px}
+.pr .sel{background:#1f2937;border:2px solid #4b5563;border-radius:8px;padding:1px 10px;font-size:17px}
+.pr .sel.hl{border-color:#FFD700;box-shadow:0 0 0 4px rgba(255,215,0,.6),0 0 18px rgba(255,215,0,.9)}
+.pr .mode{background:#CA8A04;border-radius:6px;padding:1px 10px}
+.pr .mach{background:#222;border:4px solid #FFD700;border-radius:14px;padding:4px 8px 6px}
+.pr .top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#FDE68A;font-weight:700}
+.pr .rd{background:#F59E0B;color:#1F1300;border-radius:8px;padding:1px 10px;font-size:16px;font-weight:900}
+.pr .reels{display:flex;gap:8px;justify-content:center;margin-top:4px;min-height:82px;align-items:center}
+.pr .reel{width:56px;height:80px;background:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1;color:#111}
+.pr .reel.q{background:#D1D5DB;color:#9CA3AF;font-size:30px}
+.pr .reel .rk{font-size:22px}.pr .reel .st{font-size:32px}
+.pr .reel.r{color:var(--red)}
+.pr .reel.spin{animation:prspin .1s infinite linear}
+@keyframes prspin{50%{transform:translateY(-8px);filter:blur(3px)}}
+.pr .spin{margin-top:6px;background:#EAB308;color:#111;font-size:17px;font-weight:900;text-align:center;border-radius:12px;padding:3px 0;border-bottom:5px solid #A16207;transition:transform .12s}
+.pr .spin.press{transform:translateY(4px) scale(.97);border-bottom-width:1px}
+.pr .lever{position:absolute;right:12px;top:80px;width:28px;height:120px}
+.pr .lever i{position:absolute;left:10px;top:20px;width:8px;height:96px;border-radius:4px;background:linear-gradient(90deg,#9ca3af,#f3f4f6,#6b7280)}
+.pr .lever b{position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff6b6b,#b91c1c);transition:transform .25s}
+.pr .lever.pull b{transform:translateY(70px)}
+.pr .timeup{position:absolute;inset:0;border-radius:18px;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;animation:tuin .4s ease-out}
+@keyframes tuin{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+.pr .timeup b{font-size:46px;font-weight:900;color:#FFD700}
+.pr .timeup span{font-size:17px;padding:0 20px;text-align:center}
+.toolrow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center}
+.toolrow .shot img{width:100%;border-radius:14px;border:2px solid var(--line);display:block}
+.toolrow ol{margin:8px 0 12px 1.3em;font-size:17px;color:var(--body)}
+.toolrow .note{font-size:14px;color:var(--mute);margin-top:6px}
+@media (max-width:760px){.toolrow{grid-template-columns:1fr}}
 /* controls under stage */
 .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
 .btn{font:inherit;font-size:17px;font-weight:700;border:0;border-radius:12px;padding:9px 18px;cursor:pointer;background:var(--teal);color:#fff}
@@ -128,22 +151,9 @@ section.game{padding:22px 0 10px}
 .rbox.key{border-color:var(--amber);background:#FFF8E8}
 .rbox li{font-size:17px;color:var(--body);margin-left:1.2em}
 .rbox p{font-size:17px;color:var(--body)}
-/* live drawer */
+/* tool link box */
 .live{background:#fff;border:3px solid var(--amber);border-radius:20px;padding:16px 18px;margin:8px 0 18px}
 .live h3{font-size:24px;font-weight:900}
-.live .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
-.live .drawn{display:flex;gap:12px;min-height:150px;align-items:center;flex-wrap:wrap}
-.bigc{width:100px;height:140px;border-radius:12px;border:3px solid #B9AF9C;background:#FFFDF8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;line-height:1;animation:pop2 .4s ease-out}
-.bigc .rk{font-size:40px}.bigc .st{font-size:56px}
-.bigc.r{color:var(--red)}
-@keyframes pop2{from{transform:scale(.3) rotate(-15deg);opacity:0}to{transform:none;opacity:1}}
-.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
-.team{border:2px solid var(--line);border-radius:14px;padding:8px 10px;text-align:center}
-.team input{font:inherit;font-size:17px;font-weight:700;border:0;border-bottom:2px dashed var(--line);width:100%;text-align:center;background:transparent;color:var(--ink)}
-.team .pts{font-size:40px;font-weight:900;color:var(--orange)}
-.team button{font:inherit;font-size:18px;font-weight:900;width:44px;height:38px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer}
-.stat{font-size:20px;font-weight:900}
-.stat b{color:var(--orange)}
 footer{border-top:1px solid var(--line);margin-top:20px;padding:22px 0 40px;color:var(--body)}
 footer .fb{display:inline-block;margin-top:8px;font-weight:700;color:#fff;background:#1F5FBF;border-radius:999px;padding:8px 18px;text-decoration:none}
 @media (max-width:640px){.btn{font-size:16px;padding:8px 14px}.chap .d{display:none}}
@@ -523,7 +533,7 @@ function roundGame(mode){
   const isSwap = mode === 'swap';
   return {
     id: isSwap ? 'swap' : 'cut',
-    name: isSwap ? '去頭去尾' : '逆轉勝',
+    name: isSwap ? '逆轉勝' : '去頭去尾',
     sub: isSwap ? '最大、最小互換' : '最大、最小去掉，只有中間的人得分',
     players: ['阿美', '阿雄', '阿珠', '阿德'],
     chapters: [
@@ -621,72 +631,86 @@ function roundGame(mode){
     }
   };
 }
-GAMES.push(roundGame('cut'));   // 先教逆轉勝
-GAMES.push(roundGame('swap'));  // 再教去頭去尾
+GAMES.push(roundGame('swap'));  // 先教逆轉勝：最大、最小互換
+GAMES.push(roundGame('cut'));   // 再教去頭去尾：最大、最小去掉
 
-/* 5. 抽籤搶牌 */
+/* 5. 抽籤搶牌：模擬「撲克拉霸抽籤器」 mattsue1003.github.io/pokerrandom */
+const TOOL = 'https://mattsue1003.github.io/pokerrandom/';
 GAMES.push({
-  id: 'grab', name: '抽籤搶牌', sub: '抽籤機抽到哪張，就搶哪張',
+  id: 'grab', name: '抽籤搶牌', sub: '用「撲克拉霸抽籤器」抽牌，看到哪張就搶哪張',
   players: ['阿美', '阿雄', '阿珠', '阿德'],
   chapters: [
-    {t: '散牌', d: '牌翻開，散在桌上', mini: ['7♥', 'Q♠', '3♦']},
-    {t: '抽籤', d: '抽籤機抽出一張', mini: ['7♥*']},
-    {t: '搶牌得分', d: '先搶到一模一樣那張的人得 1 分', mini: ['7♥*']},
-    {t: '逐步加難度', d: '1–3 回合抽 1 張、4–6 抽 2 張、7–10 抽 3 張', mini: ['Q♠', '3♦', 'A♣']},
-    {t: '結束', d: '10 回合後，最高分的贏', mini: ['K♥', 'K♠']},
+    {t: '散牌', d: '52 張洗勻散在桌上（初階數字朝上）', mini: ['7♥', 'Q♠', '3♦', 'A♣']},
+    {t: '設定抽籤器', d: '打開抽籤器：一次抽 1 張、不重複', mini: ['b']},
+    {t: '拉桿抽牌', d: '帶領者拉桿或按 SPIN', mini: ['7♥*']},
+    {t: '搶牌得分', d: '先搶到的得 1 分，每人每回合限拿一張', mini: ['7♥*']},
+    {t: '逐步加難度', d: '第 4 回合抽 2 張、第 7 回合抽 3 張', mini: ['Q♠', '3♦', 'A♣']},
+    {t: '結束', d: '10 回合 TIME UP，算手中的牌', mini: ['K♥', 'K♠']},
   ],
   rules: [
-    ['怎麼準備', ['整副牌<b>翻開</b>，散在桌子中間。', '四個人圍著桌子坐好，手先放在膝蓋上。']],
-    ['怎麼玩、怎麼得分', ['抽籤機抽出一張牌（用下面的「現場抽籤器」）。', '大家看畫面，<b>搶桌上一模一樣的那張</b>（同花色、同數字）。', '先搶到的人得 1 分，牌拿到自己面前。']],
-    ['逐步增加挑戰', ['第 1–3 回合：每次抽 <b>1 張</b>。', '第 4–6 回合：每次抽 <b>2 張</b>。', '第 7–10 回合：每次抽 <b>3 張</b>。']],
-    ['什麼時候結束', ['玩 <b>10 回合</b>，最高分的人贏。', '簡單版：只看數字、不看花色。']],
+    ['怎麼準備', ['每桌 4–8 人，52 張撲克牌（不含鬼牌）洗勻，散在桌上。', '<b>初階</b>：數字朝上，直接找。', '<b>進階</b>：牌背朝上，要翻開確認，考記憶。', '帶領者打開<a href="' + TOOL + '" target="_blank" rel="noopener">撲克拉霸抽籤器</a>投影出來。']],
+    ['怎麼玩、怎麼得分', ['帶領者拉桿（或按 SPIN）開牌。', '大家看畫面，<b>搶桌上一模一樣的那張</b>。', '第一個搶到實體牌的人得 1 分。', '<b>每人每回合限拿一張。</b>']],
+    ['逐步增加挑戰', ['抽籤器的「一次抽幾張」：', '第 1–3 回合選 <b>1 張</b>', '第 4–6 回合選 <b>2 張</b>', '第 7–10 回合選 <b>3 張</b>']],
+    ['什麼時候結束', ['抽籤器顯示「回合 10 / 10」後跳出 <b>TIME UP</b>。', '數一數手中的牌，最多的人贏。', '「可重複」模式抽到重複的牌：拿到那張的人要放回桌上、失去 1 分。']],
   ],
   key: '先看花色、再看數字：紅色牌往桌上紅色的區域找，視線由近到遠掃一遍，比亂看快很多。',
   async script(){
     buildSeats(this.players);
     chap(0);
-    const deck = [];
-    for (const s of ['♠', '♥', '♦', '♣']) for (let r = 1; r <= 13; r++) deck.push(D(r, s));
-    // fixed demo layout: 24 cards
     const pick = [[7,'♥'],[12,'♠'],[3,'♦'],[1,'♣'],[9,'♠'],[5,'♥'],[11,'♦'],[2,'♣'],[13,'♥'],[6,'♠'],[10,'♦'],[4,'♣'],[8,'♥'],[1,'♠'],[12,'♦'],[3,'♣'],[6,'♥'],[13,'♠'],[2,'♦'],[9,'♣'],[4,'♥'],[11,'♠'],[5,'♦'],[7,'♣']];
     const cs = pick.map(([r, s]) => card(r, s));
     sfx('shuffle'); await sleep(400);
-    const pos = cs.map((c, i) => ({x: 395 + (i % 6) * 98 + ((i * 41) % 17) - 8, y: 225 + Math.floor(i / 6) * 100 + ((i * 23) % 15) - 7, rot: ((i * 31) % 25) - 12, z: 10, up: true}));
+    const pos = cs.map((c, i) => ({x: 478 + (i % 6) * 92 + ((i * 41) % 15) - 7, y: 225 + Math.floor(i / 6) * 100 + ((i * 23) % 15) - 7, rot: ((i * 31) % 25) - 12, z: 10, up: true}));
     await dealTo(cs.map((c, i) => [c, pos[i]]), 70);
-    await cue('第 1 步　散牌', '牌翻開，散在桌上', '整副牌<b>翻開</b>散在桌子中間（示範用 24 張），大家手放膝蓋上準備。');
-    const slot = el('slot', '<h4>🎰 抽籤機</h4><div class="reels"></div>');
-    const reels = slot.querySelector('.reels');
-    const showReels = (list, spinning) => {
-      reels.innerHTML = list.map(([r, s]) => `<div class="reel${suitRed(s) ? ' r' : ''}${spinning ? ' spin' : ''}"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`).join('');
-    };
+    await cue('第 1 步　散牌', '牌洗勻，散在桌上', '52 張洗勻散開（示範用 24 張）。<b>初階</b>數字朝上；<b>進階</b>牌背朝上，要翻開確認。');
+    // the draw tool, drawn like 撲克拉霸抽籤器
+    const tool = el('pr', `<h4>🎰 撲克拉霸抽籤器</h4>
+      <div class="opts"><span>一次抽幾張</span><span class="sel">1 張 ▾</span><span class="mode">不重複</span></div>
+      <div class="mach"><div class="top"><span class="left">剩餘: 52</span><span class="rd">回合 0 / 10</span></div><div class="reels"></div></div>
+      <div class="spin">SPIN! 啟動抽籤</div><div class="lever"><i></i><b></b></div>`);
+    const sel = tool.querySelector('.sel'), reels = tool.querySelector('.reels'), rd = tool.querySelector('.rd'), left = tool.querySelector('.left'), btn = tool.querySelector('.spin'), lever = tool.querySelector('.lever');
+    let remain = 52, round = 0;
+    const showReels = (list, spinning) => { reels.innerHTML = list.map(c => c ? `<div class="reel${suitRed(c[1]) ? ' r' : ''}${spinning ? ' spin' : ''}"><span class="rk">${RN[c[0]]}</span><span class="st">${c[1]}</span></div>` : '<div class="reel q">?</div>').join(''); };
+    showReels([null]);
+    chap(1);
+    sel.classList.add("hl");
+    await cue('第 2 步　設定抽籤器', '一次抽 1 張、不重複', '帶領者打開<b>撲克拉霸抽籤器</b>投影出來：「一次抽幾張」選 <b>1 張</b>，模式選<b>不重複</b>。');
+    sel.classList.remove('hl');
     const spin = async targets => {
+      round++; sfx('pop'); lever.classList.add('pull'); btn.classList.add('press'); await sleep(260); lever.classList.remove('pull'); btn.classList.remove('press');
       for (let k = 0; k < 14; k++) { showReels(targets.map(() => pick[Math.floor(Math.random() * pick.length)]), true); sfx('tick'); await sleep(70 + k * 6); }
-      showReels(targets, false); sfx('ding'); await sleep(600);
+      showReels(targets, false); sfx('ding'); remain -= targets.length; left.textContent = `剩餘: ${remain}`; rd.textContent = `回合 ${round} / 10`; rnd(`第 ${round} 回合 / 10`);
+      await sleep(600);
     };
     const find = ([r, s]) => cs.find(c => c.r === r && c.s === s);
     const grab = async (targets, who) => {
       const tc = targets.map(find); glow(tc);
-      note('看清楚，搶一模一樣的那張！'); await sleep(500);
+      note('看清楚畫面，搶桌上一模一樣的那張！'); await sleep(500);
       who.forEach((p, i) => hand(p, tc[i].o.x, tc[i].o.y)); await sleep(380); sfx('slap'); await sleep(200);
       glow(tc, false);
       who.forEach((p, i) => { place(tc[i], {x: WON[p].x + scores[p] * 4, y: WON[p].y, rot: 0, sc: .7, z: 30 + scores[p]}); addScore(p, 1); });
       sfx('coin'); await sleep(900);
     };
-    chap(1); rnd('第 1 回合 / 10');
-    await cue('第 2 步　抽籤', '抽籤機抽一張', '帶領者按抽籤機，畫面停在哪一張，大家就去找那一張。');
-    await spin([[7, '♥']]);
     chap(2);
-    await grab([[7, '♥']], [2]);
-    await cue('第 3 步　搶牌得分', '先搶到的得 1 分', '阿珠先摸到 <b>紅心 7</b>，得 1 分，牌放到自己面前。');
-    rnd('第 2 回合 / 10'); await spin([[12, '♠']]); await grab([[12, '♠']], [0]);
+    await cue('第 3 步　拉桿抽牌', '拉桿或按 SPIN', '帶領者拉右邊的<b>拉桿</b>或按 <b>SPIN! 啟動抽籤</b>，畫面停在哪一張，大家就去找那一張。');
+    await spin([[7, '♥']]);
     chap(3);
-    await cue('第 4 步　逐步加難度', '抽的張數越來越多', '第 1–3 回合抽 <b>1 張</b>，第 4–6 回合抽 <b>2 張</b>，第 7–10 回合抽 <b>3 張</b>。');
-    rnd('第 4 回合 / 10（抽 2 張）'); await spin([[3, '♦'], [9, '♣']]); await grab([[3, '♦'], [9, '♣']], [1, 3]);
-    rnd('第 7 回合 / 10（抽 3 張）'); await spin([[13, '♥'], [1, '♣'], [6, '♠']]); await grab([[13, '♥'], [1, '♣'], [6, '♠']], [3, 2, 3]);
+    await grab([[7, '♥']], [2]);
+    await cue('第 4 步　搶牌得分', '先搶到的得 1 分', '阿珠先摸到<b>紅心 7</b>，得 1 分。<b>每人每回合限拿一張。</b>');
+    await spin([[12, '♠']]); await grab([[12, '♠']], [0]);
     chap(4);
-    await cue('第 5 步　結束', '10 回合後比分數', '玩完第 <b>10 回合</b>，分數最高的人贏。');
-    rnd('第 10 回合 / 10'); note('（快轉到最後）');
-    [4, 5, 6, 8].forEach((v, p) => setScore(p, v)); crown(3); sfx('win'); note('阿德 8 分最高，獲勝！');
+    sel.textContent = '2 張 ▾'; sel.classList.add('hl'); sfx('pop');
+    await cue('第 5 步　逐步加難度', '第 4 回合起抽 2 張', '第 1–3 回合抽 1 張；第 4 回合把「一次抽幾張」改成 <b>2 張</b>，第 7 回合改成 <b>3 張</b>。');
+    sel.classList.remove('hl');
+    round = 3; await spin([[3, '♦'], [9, '♣']]); await grab([[3, '♦'], [9, '♣']], [1, 3]);
+    sel.textContent = '3 張 ▾'; sel.classList.add('hl'); sfx('pop'); note('第 7 回合：改成一次抽 3 張'); await sleep(900); sel.classList.remove('hl');
+    round = 6; await spin([[13, '♥'], [1, '♣'], [6, '♠']]); await grab([[13, '♥'], [1, '♣'], [6, '♠']], [3, 2, 0]);
+    chap(5);
+    rd.textContent = '回合 10 / 10'; rnd('第 10 回合 / 10');
+    const tu = el('timeup', '<b>TIME UP!</b><span>10 回合已結束！請結算手中的牌數分。</span>', tool); sfx('buzz');
+    await cue('第 6 步　結束', '10 回合 TIME UP', '抽籤器跳出 <b>TIME UP</b>，數一數自己手中的牌，最多的人贏。');
+    note('（快轉到最後）數手中的牌');
+    [5, 4, 6, 7].forEach((v, p) => setScore(p, v)); crown(3); sfx('win'); note('阿德手上 7 張最多，獲勝！');
     await cue('制勝關鍵', '先看花色再看數字', this.key, 3200);
   }
 });
@@ -879,38 +903,24 @@ function show(i){
 document.getElementById('tabs').innerHTML = GAMES.map((g, i) => `<button class="tab" role="tab" data-i="${i}"><b>${i + 1}</b>${g.name}</button>`).join('');
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(+t.dataset.i));
 
-/* ---- 現場抽籤器 (抽籤搶牌) ---- */
+/* ---- 抽籤搶牌：連到撲克拉霸抽籤器 ---- */
 const LIVE_HTML = `<div class="live">
-  <h3>🎰 現場抽籤器</h3>
-  <p class="note">按「抽牌」：第 1–3 回合抽 1 張、第 4–6 回合抽 2 張、第 7–10 回合抽 3 張。抽過的牌不會再出現。</p>
-  <div class="row"><button class="btn o" id="lvDraw">抽牌</button><span class="stat">第 <b id="lvRound">0</b> / 10 回合　這回合抽 <b id="lvN">1</b> 張</span><button class="btn g" id="lvReset">重新開始</button></div>
-  <div class="drawn" id="lvCards"></div>
-  <div class="teams" id="lvTeams"></div>
+  <div class="toolrow">
+    <a class="shot" href="${TOOL}" target="_blank" rel="noopener"><img src="img/pokerrandom.jpg" alt="撲克拉霸抽籤器畫面"></a>
+    <div>
+      <h3>上課時，打開這個抽籤器</h3>
+      <ol>
+        <li>投影「撲克拉霸抽籤器」，模式選<b>不重複</b>。</li>
+        <li>「一次抽幾張」：第 1–3 回合 <b>1 張</b>、第 4–6 回合 <b>2 張</b>、第 7–10 回合 <b>3 張</b>。</li>
+        <li>拉右邊的拉桿或按 <b>SPIN! 啟動抽籤</b>。</li>
+        <li>右邊「回合紀錄」看抽過哪些牌；10 回合後跳出 TIME UP。</li>
+      </ol>
+      <a class="btn o" href="${TOOL}" target="_blank" rel="noopener">🎰 打開撲克拉霸抽籤器</a>
+      <p class="note">mattsue1003.github.io/pokerrandom</p>
+    </div>
+  </div>
 </div>`;
-function initLive(){
-  let deck = [], round = 0; const pts = [0, 0, 0, 0];
-  const fresh = () => { deck = []; for (const s of ['♠', '♥', '♦', '♣']) for (let r = 1; r <= 13; r++) deck.push([r, s]); round = 0; pts.fill(0); upd(); document.getElementById('lvCards').innerHTML = ''; };
-  const nFor = r => r <= 3 ? 1 : r <= 6 ? 2 : 3;
-  const upd = () => {
-    document.getElementById('lvRound').textContent = round;
-    document.getElementById('lvN').textContent = nFor(Math.min(round + 1, 10));
-    document.getElementById('lvDraw').disabled = round >= 10;
-    document.getElementById('lvTeams').innerHTML = pts.map((v, i) => `<div class="team"><input value="${['第 1 組', '第 2 組', '第 3 組', '第 4 組'][i]}" aria-label="組名"><div class="pts">${v}</div><button data-i="${i}" data-d="-1">−</button> <button data-i="${i}" data-d="1">＋</button></div>`).join('');
-    document.querySelectorAll('#lvTeams button').forEach(b => b.onclick = () => { pts[b.dataset.i] = Math.max(0, pts[b.dataset.i] + +b.dataset.d); if (+b.dataset.d > 0) { try { ST.muted || SFX.coin(); } catch (e) {} } upd(); });
-  };
-  document.getElementById('lvDraw').onclick = async () => {
-    ac(); if (round >= 10) return; round++; const n = nFor(round);
-    const box = document.getElementById('lvCards'); box.innerHTML = '';
-    for (let k = 0; k < 10; k++) { if (!ST.muted) SFX.tick(); box.innerHTML = Array.from({length: n}, () => { const [r, s] = deck[Math.floor(Math.random() * deck.length)]; return `<div class="bigc${suitRed(s) ? ' r' : ''}" style="animation:none;opacity:.6"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`; }).join(''); await new Promise(r => setTimeout(r, 70)); }
-    const got = []; for (let k = 0; k < n; k++) got.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
-    box.innerHTML = got.map(([r, s]) => `<div class="bigc${suitRed(s) ? ' r' : ''}"><span class="rk">${RN[r]}</span><span class="st">${s}</span></div>`).join('');
-    if (!ST.muted) SFX.ding();
-    if (round === 10 && !ST.muted) setTimeout(() => SFX.win(), 600);
-    upd();
-  };
-  document.getElementById('lvReset').onclick = fresh;
-  fresh();
-}
+function initLive(){}
 
 const start = Math.max(0, GAMES.findIndex(g => '#' + g.id === location.hash));
 show(start);
